@@ -1,4 +1,4 @@
-package org.bbsk.mysender.crawler.utils;
+package org.bbsk.mysender.crawler;
 
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.chrome.ChromeOptions;

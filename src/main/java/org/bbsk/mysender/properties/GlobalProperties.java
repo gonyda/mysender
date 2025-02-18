@@ -1,25 +1,25 @@
 package org.bbsk.mysender.properties;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+@Setter
 @Getter
-@RequiredArgsConstructor
 @ConfigurationProperties(prefix = "mysender")
-@Component
 public class GlobalProperties {
-
     private Chrome chrome;
 
+    @Setter
     @Getter
     public static class Chrome {
         private Driver driver;
 
+        @Setter
         @Getter
         public static class Driver {
             private String path;
+
         }
     }
 }

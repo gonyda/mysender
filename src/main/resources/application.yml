@@ -30,8 +30,8 @@ spring:
     # Auto Restart
     restart:
       enabled: true
-  config:
-    import: env.yml
+  # config:
+    # import: env.yml
 
 # Logging 설정
 logging.level:
@@ -44,4 +44,5 @@ logging.level:
 # Chrome Driver
 mysender:
   chrome:
-    driver: classpath:chromedriver
+    driver:
+      path: classpath:chromedriver
