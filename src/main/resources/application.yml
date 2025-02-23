@@ -1,16 +1,9 @@
-# Server 설정
-server:
-  port: 1111
-  servlet:
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
-    session:
-      timeout: 6h
-
+# local
 # MySQL 및 JPA 설정
 spring:
+  config:
+    activate:
+      on-profile: local
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/anything?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
@@ -43,6 +36,83 @@ spring:
           starttls:
             enable: true
             required: true
+
+# Server 설정
+server:
+  port: 1111
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    session:
+      timeout: 6h
+
+# Logging 설정
+logging.level:
+  org.hibernate.orm.jdbc.bind: trace
+  root: info
+  org:
+    springframework:
+      cache: TRACE;
+
+# Chrome Driver
+mysender:
+  chrome:
+    driver:
+      path: classpath:chromedriver
+
+---
+
+# prod
+# MySQL 및 JPA 설정
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/anything?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        # n + 1 문제 해결, in절로 쿼리 실행
+        default_batch_fetch_size: 10
+  devtools:
+    # Auto Restart
+    restart:
+      enabled: true
+  # Gmail:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+# Server 설정
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    session:
+      timeout: 6h
 
 # Logging 설정
 logging.level:
