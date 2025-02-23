@@ -1,40 +1,36 @@
 package org.bbsk.mysender.fmkorea.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bbsk.mysender.annotation.MeasureExecutionTime;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
-import org.bbsk.mysender.gmail.service.GmailService;
+import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.bbsk.mysender.fmkorea.entity.FmKoreaSearchKeywordEntity.*;
+import static org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
 public class FmKoreaService {
 
-    private final GmailService gmailService;
-
     /**
      * 에펨코리아 - 주식 게시판 - 키워드 검색
+     *
      * @param chromeDriver
+     * @param keyword
+     * @return List<FmKoreaMailDto>
      */
-    public void getFmKoreaSearchKeywordByStock(WebDriver chromeDriver) {
-        log.info("## Start");
-
-        Instant startTime = Instant.now();
-
+    @MeasureExecutionTime
+    public List<FmKoreaMailDto> getFmKoreaSearchKeywordByStock(WebDriver chromeDriver, String keyword) {
+        List<FmKoreaMailDto> dtoList = new ArrayList<>();
         try {
             // 부모 요소 가져오기
             WebElement parentElement = getParentElement(chromeDriver);
@@ -42,12 +38,9 @@ public class FmKoreaService {
             // 부모 요소에서 게시글 리스트 가져오기
             List<WebElement> articles = getArticles(parentElement);
 
-            List<FmKoreaSearchKeywordEntityBuilder> entityList = new ArrayList<>();
-
             for (int i = 0; i < articles.size(); i++) {
+                // 현재 작업건수 출력
                 printProcessingCount(i + 1, articles.size());
-
-                FmKoreaSearchKeywordEntityBuilder entityBuilder = builder();
                 try {
                     // 페이지 변경 뒤로 가기 후 다시 요소 찾기
                     parentElement = getParentElement(chromeDriver);
@@ -60,17 +53,26 @@ public class FmKoreaService {
                     // 글 링크
                     String fullUrl = article.getAttribute("href");
 
-                    // ## 제목, 작성시간, 링크
-                    entityBuilder = entityBuilder
+                    // ## 제목, 작성시간, 링크, 키워드
+                    FmKoreaMailDtoBuilder entityBuilder = builder()
                                     .title(getValue(article))
                                     .createdTime(getValue(timeElement))
-                                    .link(fullUrl);
+                                    .link(fullUrl)
+                                    .keyword(keyword);
 
                     // 해당 글 링크로 이동 후 내용 크롤링
                     chromeDriver.get(fullUrl);
 
                     // 글 본문 크롤링
+                    // ## 글 본문, 이미지 링크
                     getContentCrawling(chromeDriver, entityBuilder);
+
+                    dtoList.add(entityBuilder.build());
+
+                    // TODO 임시코드 삭제
+                    if(i == 2) {
+                        break;
+                    }
 
                     // **목록 페이지로 다시 이동**
                     chromeDriver.navigate().back();
@@ -78,22 +80,14 @@ public class FmKoreaService {
                     log.error("개별 게시글 크롤링 중 오류 발생, 다음 글로 이동");
                     log.error(e.getMessage());
                 }
-                entityList.add(entityBuilder);
             }
-
-            // TODO 이메일 발송
-//            gmailService.sendHtmlEmail("bbsk3939@gmail.com", "연습입니다앙~", "발송되냐?");
-
         } catch (Exception e) {
             log.error(e.getMessage());
-        } finally {
-            // 작업 소요시간 출력
-            printWorkDuration(startTime);
-
-            log.info("## End");
-            // WebDriver 종료
-            chromeDriver.quit();
         }
+
+        // WebDriver 종료
+        chromeDriver.quit();
+        return dtoList;
     }
 
     /**
@@ -110,7 +104,7 @@ public class FmKoreaService {
      * @param chromeDriver
      * @param entityBuilder 메일로 발송 보낼 객체
      */
-    private static void getContentCrawling(WebDriver chromeDriver, FmKoreaSearchKeywordEntityBuilder entityBuilder) {
+    private static void getContentCrawling(WebDriver chromeDriver, FmKoreaMailDtoBuilder entityBuilder) {
         try {
             // **게시글 본문 크롤링**
             WebElement contentElement = chromeDriver.findElement(By.cssSelector("div.xe_content"));
@@ -131,16 +125,6 @@ public class FmKoreaService {
         } catch (Exception ex) {
             log.error("본문 내용 로드 실패: {}", ex.getMessage());
         }
-    }
-
-    /**
-     * 총 소요시간 출력
-     * @param startTime
-     */
-    private static void printWorkDuration(Instant startTime) {
-        Instant endTime = Instant.now();
-        Duration duration = Duration.between(startTime, endTime);
-        log.info("## 총 소요시간: {}초", duration.toSeconds());
     }
 
     /**

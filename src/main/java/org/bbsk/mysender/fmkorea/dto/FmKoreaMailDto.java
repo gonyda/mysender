@@ -1,4 +1,4 @@
-package org.bbsk.mysender.fmkorea.entity;
+package org.bbsk.mysender.fmkorea.dto;
 
 import lombok.*;
 
@@ -10,7 +10,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-public class FmKoreaSearchKeywordEntity {
+public class FmKoreaMailDto {
+    private String keyword;
     private String title;
     private String createdTime;
     private String link;
