@@ -8,6 +8,7 @@ import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,9 @@ import static org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto.*;
 @Slf4j
 public class FmKoreaService {
 
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
+
     /**
      * 에펨코리아 - 주식 게시판 - 키워드 검색
      *
@@ -30,6 +34,8 @@ public class FmKoreaService {
      */
     @MeasureExecutionTime
     public List<FmKoreaMailDto> getFmKoreaSearchKeywordByStock(WebDriver chromeDriver, String keyword) {
+        // TODO 중복 걸러서 가져오기 방법 고민
+        // TODO 크롤링 시간대 고민
         List<FmKoreaMailDto> dtoList = new ArrayList<>();
         try {
             // 부모 요소 가져오기
@@ -69,8 +75,8 @@ public class FmKoreaService {
 
                     dtoList.add(entityBuilder.build());
 
-                    // TODO 임시코드 삭제
-                    if(i == 1) {
+                    // local 환경에서는 2개만 조회
+                    if ("local".equals(activeProfile) && i == 1) {
                         break;
                     }
 

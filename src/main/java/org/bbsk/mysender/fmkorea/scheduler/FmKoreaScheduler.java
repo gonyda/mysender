@@ -24,7 +24,7 @@ public class FmKoreaScheduler {
     private final GmailService gmailService;
     private final FmKoreaSearchKeywordRepository fmKoreaSearchKeywordRepository;
 
-    @Scheduled(cron = "0 26 * * * ?")
+    @Scheduled(cron = "0 50 * * * ?")
     public void getFmKoreaSearchKeywordByStock() {
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
         List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
@@ -38,7 +38,6 @@ public class FmKoreaScheduler {
         }
 
         if(!mailList.isEmpty()) {
-            // 글내용
             for (List<FmKoreaMailDto> mail : mailList) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("<!DOCTYPE html>");
@@ -52,8 +51,8 @@ public class FmKoreaScheduler {
                 sb.append(".email-header {font-size: 24px; font-weight: bold; color: #333;}");
                 sb.append(".email-time {font-size: 12px; color: #777;}");
                 sb.append(".email-body {font-size: 16px; color: #444;}");
-                sb.append(".email-image {margin-top: 20px;}");
-                sb.append(".email-image img {max-width: 100%; height: auto; border-radius: 5px;}");
+                sb.append(".email-image {text-align: center; margin-top: 20px;}");
+                sb.append(".email-image img {max-width: 100%; height: auto; border-radius: 5px; display: block; margin: 0 auto;}");
                 sb.append(".highlight { color: darkorange; font-weight: bold; }");
                 sb.append("</style>");
                 sb.append("</head>");
@@ -86,7 +85,9 @@ public class FmKoreaScheduler {
                 sb.append("</div>");
                 sb.append("</body>");
                 sb.append("</html>");
-                gmailService.sendEmail("bbsk3939@gmail.com", mailList.get(0).get(0).getKeyword() + " 검색 결과", sb.toString());
+                gmailService.sendEmail("bbsk3939@gmail.com"
+                                        , StringUtils.join(mail.get(0).getKeyword(), " 검색결과 ", mail.size(), "개")
+                                        , sb.toString());
                 sb = null;
             }
         }
