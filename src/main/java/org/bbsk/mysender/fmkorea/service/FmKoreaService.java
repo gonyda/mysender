@@ -70,7 +70,7 @@ public class FmKoreaService {
                     dtoList.add(entityBuilder.build());
 
                     // TODO 임시코드 삭제
-                    if(i == 2) {
+                    if(i == 1) {
                         break;
                     }
 

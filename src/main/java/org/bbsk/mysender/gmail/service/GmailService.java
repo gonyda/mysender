@@ -15,7 +15,13 @@ public class GmailService {
 
     private final JavaMailSender mailSender;
 
-    public void sendHtmlEmail(String to, String title, String content) {
+    /**
+     * Gmail 발송
+     * @param to 받는 사람
+     * @param title 메일 제목
+     * @param content 메일 본문
+     */
+    public void sendEmail(String to, String title, String content) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

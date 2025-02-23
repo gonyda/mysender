@@ -24,7 +24,7 @@ public class FmKoreaScheduler {
     private final GmailService gmailService;
     private final FmKoreaSearchKeywordRepository fmKoreaSearchKeywordRepository;
 
-    @Scheduled(cron = "0 35 * * * ?")
+    @Scheduled(cron = "0 26 * * * ?")
     public void getFmKoreaSearchKeywordByStock() {
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
         List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
@@ -38,10 +38,67 @@ public class FmKoreaScheduler {
         }
 
         if(!mailList.isEmpty()) {
-            // TODO 메일 발송
-            //gmailService.sendHtmlEmail("bbsk3939@gmail.com", "연습입니다앙~", "발송되냐?");
+            // 글내용
+            for (List<FmKoreaMailDto> mail : mailList) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<!DOCTYPE html>");
+                sb.append("<html lang=\"ko\">");
+                sb.append("<head>");
+                sb.append("<meta charset=\"UTF-8\">");
+                sb.append("<style>");
+                sb.append("body {font-family: Arial, sans-serif; line-height: 1.6; background-color: #f4f4f4; margin: 0; padding: 20px;}");
+                sb.append(".email-container {max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);}");
+                sb.append(".email-post { padding: 15px; margin-bottom: 20px; background: #fafafa; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }");
+                sb.append(".email-header {font-size: 24px; font-weight: bold; color: #333;}");
+                sb.append(".email-time {font-size: 12px; color: #777;}");
+                sb.append(".email-body {font-size: 16px; color: #444;}");
+                sb.append(".email-image {margin-top: 20px;}");
+                sb.append(".email-image img {max-width: 100%; height: auto; border-radius: 5px;}");
+                sb.append(".highlight { color: darkorange; font-weight: bold; }");
+                sb.append("</style>");
+                sb.append("</head>");
+
+                sb.append("<body>");
+                sb.append("<div class=\"email-container\">");
+                for (FmKoreaMailDto dto : mail) {
+                    sb.append("<div class=\"email-post\">");
+                    sb.append("<div class=\"email-header\">");
+                        // 제목
+                        sb.append("<a href=\"").append(dto.getLink()).append("\" style=\"color: black\">")
+                          .append(addHighlight(dto.getTitle(), dto.getKeyword()))
+                          .append("</a> ");
+                        // 작성시간
+                        sb.append("<span class=\"email-time\">").append(dto.getCreatedTime()).append("</span>");
+                    sb.append("</div>");
+                    // 글 본문
+                    sb.append("<div class=\"email-body\">").append(addHighlight(dto.getContent(), dto.getKeyword()))
+                      .append("</div>");
+                    // 이미지 출력
+                    if(dto.getImageUrlList() != null && !dto.getImageUrlList().isEmpty()) {
+                        sb.append("<div class=\"email-image\">");
+                        for (String imgUrl : dto.getImageUrlList()) {
+                            sb.append("<img src=\"").append(imgUrl).append("\">");
+                        }
+                        sb.append("</div>");
+                    }
+                    sb.append("</div>");
+                }
+                sb.append("</div>");
+                sb.append("</body>");
+                sb.append("</html>");
+                gmailService.sendEmail("bbsk3939@gmail.com", mailList.get(0).get(0).getKeyword() + " 검색 결과", sb.toString());
+                sb = null;
+            }
         }
 
         log.info("## End");
+    }
+
+    private String addHighlight(String text, String keyword) {
+        if(StringUtils.contains(text, keyword)) {
+            return text.replaceAll("\n", "<br>").replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
+        } else {
+            return text.replaceAll("\n", "<br>");
+        }
     }
 }
