@@ -24,7 +24,7 @@ public class FmKoreaScheduler {
     private final GmailService gmailService;
     private final FmKoreaSearchKeywordRepository fmKoreaSearchKeywordRepository;
 
-    @Scheduled(cron = "0 44 * * * ?")
+    @Scheduled(cron = "0 35 * * * ?")
     public void getFmKoreaSearchKeywordByStock() {
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
         List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
@@ -37,8 +37,11 @@ public class FmKoreaScheduler {
             mailList.add(fmKoreaService.getFmKoreaSearchKeywordByStock(SeleniumUtils.getChromeDriver(), entity.getKeyword()));
         }
 
-        // TODO 메일 발송
-        //gmailService.sendHtmlEmail("bbsk3939@gmail.com", "연습입니다앙~", "발송되냐?");
+        if(!mailList.isEmpty()) {
+            // TODO 메일 발송
+            //gmailService.sendHtmlEmail("bbsk3939@gmail.com", "연습입니다앙~", "발송되냐?");
+        }
+
         log.info("## End");
     }
 }
