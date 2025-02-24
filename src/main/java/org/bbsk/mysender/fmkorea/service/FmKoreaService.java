@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class FmKoreaService {
      */
     @MeasureExecutionTime
     public List<FmKoreaMailDto> getFmKoreaSearchKeywordByStock(WebDriver chromeDriver, String keyword) {
-        // TODO 중복 걸러서 가져오기 방법 고민
+        // TODO 중복 걸러서 가져오기 방법 고민 (제일 마지막 게시글 캐시처리 후 해당 글 이후부터 크롤링)
         // TODO 크롤링 시간대 고민
         List<FmKoreaMailDto> dtoList = new ArrayList<>();
         try {
@@ -46,54 +48,111 @@ public class FmKoreaService {
 
             for (int i = 0; i < articles.size(); i++) {
                 // 현재 작업건수 출력
-                printProcessingCount(i + 1, articles.size());
+                // printProcessingCount(i + 1, articles.size());
                 try {
                     // 페이지 변경 뒤로 가기 후 다시 요소 찾기
                     parentElement = getParentElement(chromeDriver);
-                    articles = getArticles(parentElement);
-                    List<WebElement> times = parentElement.findElements(By.cssSelector("td.time")); // 작성 시간 요소 찾기
+                    // 작성 시간 요소 찾기
+                    WebElement timeElement = getTimeElement(parentElement, i); // 해당 게시글의 작성 시간
 
-                    WebElement article = articles.get(i);
-                    WebElement timeElement = times.get(i); // 해당 게시글의 작성 시간
-
-                    // 글 링크
-                    String fullUrl = article.getAttribute("href");
-
-                    // ## 제목, 작성시간, 링크, 키워드
-                    FmKoreaMailDtoBuilder entityBuilder = builder()
-                                    .title(getValue(article))
-                                    .createdTime(getValue(timeElement))
-                                    .link(fullUrl)
-                                    .keyword(keyword);
-
-                    // 해당 글 링크로 이동 후 내용 크롤링
-                    chromeDriver.get(fullUrl);
-
-                    // 글 본문 크롤링
-                    // ## 글 본문, 이미지 링크
-                    getContentCrawling(chromeDriver, entityBuilder);
-
-                    dtoList.add(entityBuilder.build());
-
-                    // local 환경에서는 2개만 조회
-                    if ("local".equals(activeProfile) && i == 1) {
+                    // 두 시간 전 ~ 현재 시간 게시글 조회
+                    if (!isValidTime(timeElement)) {
                         break;
                     }
+
+                    articles = getArticles(parentElement);
+                    WebElement article = articles.get(i);
+
+                    // 현재 작업중인 제목과 기존에 생성된 객체랑 동일하면 해당 작업 건너뛰기
+                    if (isDuplicatedArticle(dtoList, article, timeElement)) {
+                        log.info("## 중복 게시글 발생 (신규 게시글 생성)");
+                        continue;
+                    }
+
+                    // 메일 객체 생성
+                    dtoList.add(getDtoBuilder(chromeDriver, keyword, getValue(article), getValue(timeElement), article.getAttribute("href"))
+                            .build());
+
+                    // local 환경에서는 2개만 조회
+//                    if ("local".equals(activeProfile) && i == 1) {
+//                        break;
+//                    }
+
+                    log.info("## {}번째 작업완료", i + 1);
 
                     // **목록 페이지로 다시 이동**
                     chromeDriver.navigate().back();
                 } catch (Exception e) {
-                    log.error("개별 게시글 크롤링 중 오류 발생, 다음 글로 이동");
-                    log.error(e.getMessage());
+                    log.error("## 개별 게시글 크롤링 중 오류 발생, 다음 글로 이동: {}", e.getMessage());
                 }
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("## 크롤링 과정에서 오류 발생: {}", e.getMessage());
+        } finally {
+            // WebDriver 종료
+            chromeDriver.quit();
         }
 
-        // WebDriver 종료
-        chromeDriver.quit();
         return dtoList;
+    }
+
+    private static boolean isDuplicatedArticle(List<FmKoreaMailDto> dtoList, WebElement article, WebElement timeElement) {
+        return !dtoList.stream()
+                .filter(dto -> dto.getTitle().equals(getValue(article)) && dto.getCreatedTime().equals(getValue(timeElement)))
+                .toList()
+                .isEmpty();
+    }
+
+    /**
+     * @param chromeDriver
+     * @param keyword 검색 키워드
+     * @param title 제목
+     * @param createdTime 작성시간
+     * @param link 글 본문 링크
+     * @return
+     */
+    private static FmKoreaMailDtoBuilder getDtoBuilder(WebDriver chromeDriver, String keyword, String title, String createdTime, String link) {
+        // ## 제목, 작성시간, 링크, 키워드
+        FmKoreaMailDtoBuilder entityBuilder = builder()
+                        .title(title)
+                        .createdTime(createdTime)
+                        .link(link)
+                        .keyword(keyword);
+
+        // 해당 글 링크로 이동 후 내용 크롤링
+        chromeDriver.get(link);
+
+        // 글 본문 크롤링
+        // ## 글 본문, 이미지 링크
+        getContentCrawling(chromeDriver, entityBuilder);
+        return entityBuilder;
+    }
+
+    private static boolean isValidTime(WebElement timeElement) {
+        String[] hoursAndMinutes = getValue(timeElement).split(":");
+        if(hoursAndMinutes.length != 2) {
+            log.error("## 작성시간 에러 {}", getValue(timeElement));
+            return false;
+        }
+        return (Integer.parseInt(getTwoHoursBefore()) <= Integer.parseInt(hoursAndMinutes[0]));
+    }
+
+    /**
+     * 작성시간 조회
+     * @param parentElement
+     * @param i
+     * @return
+     */
+    private static WebElement getTimeElement(WebElement parentElement, int i) {
+        return parentElement.findElements(By.cssSelector("td.time")).get(i);
+    }
+
+    /**
+     * 두 시간 전 조회
+     * @return
+     */
+    private static String getTwoHoursBefore() {
+        return LocalTime.now().minusHours(2).format(DateTimeFormatter.ofPattern("HH"));
     }
 
     /**
@@ -129,7 +188,7 @@ public class FmKoreaService {
                 entityBuilder.imageUrlList(imgUrlList);
             }
         } catch (Exception ex) {
-            log.error("본문 내용 로드 실패: {}", ex.getMessage());
+            log.error("## 본문 내용 로드 실패: {}", ex.getMessage());
         }
     }
 

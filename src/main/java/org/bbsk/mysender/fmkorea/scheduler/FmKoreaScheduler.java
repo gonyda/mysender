@@ -24,16 +24,16 @@ public class FmKoreaScheduler {
     private final GmailService gmailService;
     private final FmKoreaSearchKeywordRepository fmKoreaSearchKeywordRepository;
 
-    @Scheduled(cron = "0 50 * * * ?")
+    @Scheduled(cron = "0 19 * * * ?")
     public void getFmKoreaSearchKeywordByStock() {
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
         List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
 
         log.info("## Start");
-        log.info("## keywordList: {}", StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toArray(), ", "));
+        log.info("## Keyword List: {}", StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toArray(), ", "));
 
         for (FmKoreaSearchKeyword entity : keywordList) {
-            log.info("## Keyword : {}", entity.getKeyword());
+            log.info("## Current Keyword : {}", entity.getKeyword());
             mailList.add(fmKoreaService.getFmKoreaSearchKeywordByStock(SeleniumUtils.getChromeDriver(), entity.getKeyword()));
         }
 
