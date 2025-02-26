@@ -4,192 +4,129 @@ import lombok.extern.slf4j.Slf4j;
 import org.bbsk.mysender.annotation.MeasureExecutionTime;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
+import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto.*;
 
 @Service
 @Transactional(readOnly = true)
 @Slf4j
 public class FmKoreaService {
 
-    @Value("${spring.profiles.active:}")
-    private String activeProfile;
-
     /**
      * 에펨코리아 - 주식 게시판 - 키워드 검색
-     *
+     * 전체목록 - 글 본문 방문 (가장 최신글) - 다음글로 이동 (다음글 버튼)
+     * 속도개선 (크롤링 횟수 줄이기)
      * @param chromeDriver
      * @param keyword
-     * @return List<FmKoreaMailDto>
+     * @return
      */
     @MeasureExecutionTime
-    public List<FmKoreaMailDto> getFmKoreaSearchKeywordByStock(WebDriver chromeDriver, String keyword) {
-        // TODO 중복 걸러서 가져오기 방법 고민 (제일 마지막 게시글 캐시처리 후 해당 글 이후부터 크롤링)
-        // TODO 크롤링 시간대 고민
+    public List<FmKoreaMailDto> getFmKoreaCrawlingBySearchKeywordToStock(WebDriver chromeDriver, String keyword) {
+        log.info("## Current Keyword: {}", keyword);
+
+        // 전체 게시글 목록 크롤링
+        WebElement parentElement = getParentElement(chromeDriver, keyword);
+        // 게시글 목록 중 첫번째 글
+        WebElement firstPost = parentElement.findElement(By.cssSelector("td.title.hotdeal_var8 a:not(.replyNum)"));
+        // 첫 번째 게시글의 링크 가져오기
+        String firstArticleLink = firstPost.getAttribute("href");
+        // 해당 글 링크로 이동 후 내용 크롤링
+        chromeDriver.get(firstArticleLink);
+
         List<FmKoreaMailDto> dtoList = new ArrayList<>();
-        try {
-            // 부모 요소 가져오기
-            WebElement parentElement = getParentElement(chromeDriver);
 
-            // 부모 요소에서 게시글 리스트 가져오기
-            List<WebElement> articles = getArticles(parentElement);
+        // 본문 글 크롤링
+        int workCnt = 0;
+        while (true) {
+            ContentCrawlingDto crawlingDto = getContentCrawling(chromeDriver, keyword);
 
-            for (int i = 0; i < articles.size(); i++) {
-                // 현재 작업건수 출력
-                // printProcessingCount(i + 1, articles.size());
-                try {
-                    // 페이지 변경 뒤로 가기 후 다시 요소 찾기
-                    parentElement = getParentElement(chromeDriver);
-                    // 작성 시간 요소 찾기
-                    WebElement timeElement = getTimeElement(parentElement, i); // 해당 게시글의 작성 시간
-
-                    // 두 시간 전 ~ 현재 시간 게시글 조회
-                    if (!isValidTime(timeElement)) {
-                        break;
-                    }
-
-                    articles = getArticles(parentElement);
-                    WebElement article = articles.get(i);
-
-                    // 현재 작업중인 제목과 기존에 생성된 객체랑 동일하면 해당 작업 건너뛰기
-                    if (isDuplicatedArticle(dtoList, article, timeElement)) {
-                        log.info("## 중복 게시글 발생 (신규 게시글 생성)");
-                        continue;
-                    }
-
-                    // 메일 객체 생성
-                    dtoList.add(getDtoBuilder(chromeDriver, keyword, getValue(article), getValue(timeElement), article.getAttribute("href"))
-                            .build());
-
-                    // local 환경에서는 2개만 조회
-//                    if ("local".equals(activeProfile) && i == 1) {
-//                        break;
-//                    }
-
-                    log.info("## {}번째 작업완료", i + 1);
-
-                    // **목록 페이지로 다시 이동**
-                    chromeDriver.navigate().back();
-                } catch (Exception e) {
-                    log.error("## 개별 게시글 크롤링 중 오류 발생, 다음 글로 이동: {}", e.getMessage());
-                }
+            // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
+            if(crawlingDto.isDuplicated()) {
+                break;
             }
-        } catch (Exception e) {
-            log.error("## 크롤링 과정에서 오류 발생: {}", e.getMessage());
-        } finally {
-            // WebDriver 종료
-            chromeDriver.quit();
+
+            dtoList.add(crawlingDto.getMailDto());
+            workCnt++;
+            log.info("## Crawled {} posts", workCnt);
+
+            // 다음 글 이동
+            chromeDriver.get(crawlingDto.getNextPageUrl());
         }
 
         return dtoList;
     }
 
-    private static boolean isDuplicatedArticle(List<FmKoreaMailDto> dtoList, WebElement article, WebElement timeElement) {
-        return !dtoList.stream()
-                .filter(dto -> dto.getTitle().equals(getValue(article)) && dto.getCreatedTime().equals(getValue(timeElement)))
-                .toList()
-                .isEmpty();
-    }
+    private static ContentCrawlingDto getContentCrawling(WebDriver chromeDriver, String keyword) {
+        // 1. 작성 시간 크롤링
+        WebElement dateElement = chromeDriver.findElement(By.cssSelector(".top_area .date"));
+        String date = dateElement.getText();
 
-    /**
-     * @param chromeDriver
-     * @param keyword 검색 키워드
-     * @param title 제목
-     * @param createdTime 작성시간
-     * @param link 글 본문 링크
-     * @return
-     */
-    private static FmKoreaMailDtoBuilder getDtoBuilder(WebDriver chromeDriver, String keyword, String title, String createdTime, String link) {
-        // ## 제목, 작성시간, 링크, 키워드
-        FmKoreaMailDtoBuilder entityBuilder = builder()
-                        .title(title)
-                        .createdTime(createdTime)
-                        .link(link)
-                        .keyword(keyword);
-
-        // 해당 글 링크로 이동 후 내용 크롤링
-        chromeDriver.get(link);
-
-        // 글 본문 크롤링
-        // ## 글 본문, 이미지 링크
-        getContentCrawling(chromeDriver, entityBuilder);
-        return entityBuilder;
-    }
-
-    private static boolean isValidTime(WebElement timeElement) {
-        String[] hoursAndMinutes = getValue(timeElement).split(":");
-        if(hoursAndMinutes.length != 2) {
-            log.error("## 작성시간 에러 {}", getValue(timeElement));
-            return false;
+        // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
+        if(isBeforeTwoHoursAgo(date)) {
+            return ContentCrawlingDto.builder()
+                    .isDuplicated(true)
+                    .build();
         }
-        return (Integer.parseInt(getTwoHoursBefore()) <= Integer.parseInt(hoursAndMinutes[0]));
-    }
 
-    /**
-     * 작성시간 조회
-     * @param parentElement
-     * @param i
-     * @return
-     */
-    private static WebElement getTimeElement(WebElement parentElement, int i) {
-        return parentElement.findElements(By.cssSelector("td.time")).get(i);
-    }
+        // 2. 제목 크롤링
+        WebElement titleElement = chromeDriver.findElement(By.cssSelector(".top_area h1 .np_18px_span"));
+        String title = getValue(titleElement);
 
-    /**
-     * 두 시간 전 조회
-     * @return
-     */
-    private static String getTwoHoursBefore() {
-        return LocalTime.now().minusHours(2).format(DateTimeFormatter.ofPattern("HH"));
-    }
+        // 3. 본문 내용 크롤링
+        WebElement contentElement = chromeDriver.findElement(By.cssSelector(".xe_content"));
+        String content = getValue(contentElement);
 
-    /**
-     * 현재 작업 진행 현황 출력
-     * @param currentCnt 현재 작업 건수
-     * @param totalCnt 총 작업 건수
-     */
-    private static void printProcessingCount(int currentCnt, int totalCnt) {
-        log.info("## 현재 작업 중 ... {} / {}", currentCnt, totalCnt);
-    }
-
-    /**
-     * 글의 본문 크롤링
-     * @param chromeDriver
-     * @param entityBuilder 메일로 발송 보낼 객체
-     */
-    private static void getContentCrawling(WebDriver chromeDriver, FmKoreaMailDtoBuilder entityBuilder) {
-        try {
-            // **게시글 본문 크롤링**
-            WebElement contentElement = chromeDriver.findElement(By.cssSelector("div.xe_content"));
-
-            // ## 글 내용
-            entityBuilder.content(getValue(contentElement));
-
-            // 이미지가 있는지 확인
-            List<WebElement> images = contentElement.findElements(By.tagName("img"));
-            if (!images.isEmpty()) {
-                List<String> imgUrlList = new ArrayList<>();
-                for (WebElement img : images) {
-                    imgUrlList.add(img.getAttribute("src"));
-                }
+        // 4. 이미지가 있는지 확인
+        List<WebElement> images = contentElement.findElements(By.tagName("img"));
+        List<String> imgUrlList = new ArrayList<>();
+        if (!images.isEmpty()) {
+            for (WebElement img : images) {
                 // ## 이미지 url
-                entityBuilder.imageUrlList(imgUrlList);
+                imgUrlList.add(img.getAttribute("src"));
             }
-        } catch (Exception ex) {
-            log.error("## 본문 내용 로드 실패: {}", ex.getMessage());
         }
+
+        // 5. 다음 글 링크 크롤링
+        WebElement nextPostElement = chromeDriver.findElement(By.cssSelector(".prev_next_btns .next a"));
+        // '다음 글' 링크 가져오기
+        String nextPageUrl = nextPostElement.getAttribute("href");
+
+        return ContentCrawlingDto.builder()
+                .isDuplicated(false)
+                .mailDto(FmKoreaMailDto.builder()
+                        .keyword(keyword)
+                        .link(chromeDriver.getCurrentUrl())
+                        .title(title)
+                        .content(content)
+                        .createdTime(date)
+                        .imageUrlList(imgUrlList)
+                        .build())
+                .nextPageUrl(nextPageUrl)
+                .build();
+    }
+
+    public static boolean isBeforeTwoHoursAgo(String timeStr) {
+        // 입력된 시간 형식 지정
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+
+        // 입력된 문자열을 LocalDateTime으로 변환
+        LocalDateTime inputTime = LocalDateTime.parse(timeStr, formatter);
+
+        // 현재 시간 기준 2시간 전 계산
+        LocalDateTime twoHoursAgo = LocalDateTime.now().minusHours(2);
+
+        // 입력된 시간이 2시간 전보다 이전인지 비교
+        return inputTime.isBefore(twoHoursAgo);
     }
 
     /**
@@ -201,21 +138,7 @@ public class FmKoreaService {
         return element.getText().trim();
     }
 
-    /**
-     * 게시글 목록 조회 (댓글 갯수 제외)
-     * @param parentElement
-     * @return
-     */
-    private static List<WebElement> getArticles(WebElement parentElement) {
-        return parentElement.findElements(By.cssSelector("td.title.hotdeal_var8 a:not(.replyNum)")); // 댓글 링크 제외
-    }
-
-    /**
-     * 부모 element 조회
-     * @param chromeDriver
-     * @return
-     */
-    private static WebElement getParentElement(WebDriver chromeDriver) {
-        return SeleniumUtils.getParentElement(FmKoreaStockEnum.PLTR_URL.getValue(), FmKoreaStockEnum.FIRST_CLASSNAME.getValue(), chromeDriver);
+    private static WebElement getParentElement(WebDriver chromeDriver, String keyword) {
+        return SeleniumUtils.getParentElement(FmKoreaStockEnum.getFullUrl(keyword), FmKoreaStockEnum.FIRST_CLASSNAME.getValue(), chromeDriver);
     }
 }

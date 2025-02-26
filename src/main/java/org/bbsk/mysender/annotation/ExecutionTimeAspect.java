@@ -19,7 +19,7 @@ public class ExecutionTimeAspect {
         Instant startTime = Instant.now(); // 시작시간
         Object proceed = joinPoint.proceed();       // 메서드 실행
         Instant endTime = Instant.now(); // 종료시간
-        log.info("## 소요시간 : {}초", Duration.between(startTime, endTime).getSeconds());
+        log.info("## Crawling 소요시간 : {}초", Duration.between(startTime, endTime).getSeconds());
         return proceed; // 결과 반환
     }
 }
