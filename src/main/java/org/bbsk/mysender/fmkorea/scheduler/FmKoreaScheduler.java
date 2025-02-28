@@ -29,8 +29,8 @@ public class FmKoreaScheduler {
     /**
      * 크롤링 스케줄러
      */
-//    @Scheduled(cron = "0 0 */2 * * ?")
-    @Scheduled(cron = "* 9 * * * ?")
+    @Scheduled(cron = "0 0 */2 * * ?")
+//    @Scheduled(cron = "* 31 * * * ?")
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
         log.info("## Start");
         LocalDateTime now = LocalDateTime.now();

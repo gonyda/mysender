@@ -65,6 +65,13 @@
             <version>4.6.0</version>
         </dependency>
 
+        <!-- WebDriver Manager (ChromeDriver 자동 다운로드) -->
+<!--        <dependency>-->
+<!--            <groupId>io.github.bonigarcia</groupId>-->
+<!--            <artifactId>webdrivermanager</artifactId>-->
+<!--            <version>5.3.0</version> &lt;!&ndash; 최신 버전 확인 필요 &ndash;&gt;-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

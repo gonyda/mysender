@@ -41,10 +41,10 @@ logging.level:
       cache: TRACE;
 
 # Chrome Driver
-mysender:
-  chrome:
-    driver:
-      path: classpath:chromedriver
+#mysender:
+#  chrome:
+#    driver:
+#      path: classpath:chromedriver
 
 ---
 
@@ -91,7 +91,7 @@ logging.level:
       cache: TRACE;
 
 # Chrome Driver
-mysender:
-  chrome:
-    driver:
-      path: classpath:chromedriver
+#mysender:
+#  chrome:
+#    driver:
+#      path: classpath:chromedriver
