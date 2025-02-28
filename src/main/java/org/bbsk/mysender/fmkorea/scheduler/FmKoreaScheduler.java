@@ -6,7 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaSearchKeyword;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
-import org.bbsk.mysender.fmkorea.service.FmKoreaService;
+import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByKeywordSearchService;
+import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByPopularService;
 import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
 import org.bbsk.mysender.gmail.service.GmailService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,18 +22,22 @@ import java.util.List;
 @Slf4j
 public class FmKoreaScheduler {
 
-    private final FmKoreaService fmKoreaService;
+    private final FmKoreaCrawlingByKeywordSearchService fmKoreaCrawlingByKeywordSearchService;
+    private final FmKoreaCrawlingByPopularService fmKoreaCrawlingByPopularService;
+
     private final GmailService gmailService;
     private final FmKoreaMailTemplateService fmKoreaMailTemplateService;
     private final FmKoreaSearchKeyword searchKeyword;
 
     /**
+     * 주식 게시판
+     * 키워드 검색
      * 크롤링 스케줄러
      */
     @Scheduled(cron = "0 0 */2 * * ?")
-//    @Scheduled(cron = "* 31 * * * ?")
+//    @Scheduled(cron = "0 31 * * * ?")
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
-        log.info("## Start");
+        log.info("## Search Keyword Start");
         LocalDateTime now = LocalDateTime.now();
 
         List<String> keywordList = searchKeyword.getKeywordList();
@@ -41,13 +46,15 @@ public class FmKoreaScheduler {
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
         keywordList.forEach(keyword ->
                 mailList.add(
-                        fmKoreaService.getFmKoreaCrawlingBySearchKeywordToStock(
+                        fmKoreaCrawlingByKeywordSearchService.getFmKoreaCrawlingBySearchKeywordToStock(
                                 SeleniumUtils.getChromeDriver()
                                 , keyword
                                 , now
+                                , 2
                         )
                 )
         );
+
         log.info("## End Crawling");
 
         for (List<FmKoreaMailDto> mail : mailList) {
@@ -59,9 +66,39 @@ public class FmKoreaScheduler {
             log.info("## Send Email: {}", mail.get(0).getKeyword());
         }
 
-        log.info("## End");
+        log.info("## Search Keyword End");
     }
 
+
+    /**
+     * 주식 게시판
+     * 인기글
+     * 크롤링 스케줄러
+     */
+    @Scheduled(cron = "0 0 */3 * * ?")
+//    @Scheduled(cron = "0 54 * * * ?")
+    public void getFmKoreaCrawlingByPopularToStock() {
+        log.info("## Popular Start");
+        LocalDateTime now = LocalDateTime.now();
+
+        List<FmKoreaMailDto> mailList =
+                fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(
+                        SeleniumUtils.getChromeDriver()
+                        , now
+                        , 3
+                );
+
+        log.info("## End Crawling");
+
+        gmailService.sendEmail(
+                "bbsk3939@gmail.com"
+                , StringUtils.join("인기글 검색결과 ", mailList.size(), "개")
+                , fmKoreaMailTemplateService.getHtmlForSendMail(mailList));
+
+        log.info("## Send Email: 인기글");
+
+        log.info("## Popular End");
+    }
 
 
 }

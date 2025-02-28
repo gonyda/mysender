@@ -61,7 +61,8 @@ public class FmKoreaMailTemplateService {
 
     private static String addHighlight(String text, String keyword) {
         if(StringUtils.contains(text, keyword)) {
-            return text.replaceAll("\n", "<br>").replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
+            return text.replaceAll("\n", "<br>")
+                       .replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
         } else {
             return text.replaceAll("\n", "<br>");
         }

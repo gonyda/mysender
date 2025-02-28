@@ -18,33 +18,22 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FmKoreaService {
+public class FmKoreaCrawlingByPopularService {
 
     private final FmKoreaCrawlingService fmKoreaCrawlingService;
 
-    public static final String CSS_SELECTOR_BY_FIRST_POST = "td.title.hotdeal_var8 a:not(.replyNum)";
+    public static final String CSS_SELECTOR_BY_FIRST_POST = ".fm_best_widget ul li:first-child h3.title a";
 
-    /**
-     * 에펨코리아 - 주식 게시판 - 키워드 검색
-     * 전체목록 - 글 본문 방문 (가장 최신글) - 다음글로 이동 (다음글 버튼)
-     * 속도개선 (크롤링 횟수 줄이기)
-     *
-     * @param chromeDriver
-     * @param keyword
-     * @param now
-     * @return
-     */
-    public List<FmKoreaMailDto> getFmKoreaCrawlingBySearchKeywordToStock(WebDriver chromeDriver, String keyword, LocalDateTime now) {
-        log.info("## Current Keyword: {}", keyword);
 
+    public List<FmKoreaMailDto> getFmKoreaCrawlingByPopularToStock(WebDriver chromeDriver, LocalDateTime now, int crawlingTime) {
         // 첫번째 게시글 본문으로 이동
-        moveArticle(chromeDriver, keyword);
+        moveArticle(chromeDriver);
 
         // 본문 글 크롤링
         int workCnt = 0;
         List<FmKoreaMailDto> dtoList = new ArrayList<>();
         while (true) {
-            ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver, keyword, now);
+            ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver, "", now, crawlingTime);
 
             // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
             if(crawlingDto.isDuplicated()) {
@@ -59,42 +48,35 @@ public class FmKoreaService {
             chromeDriver.get(crawlingDto.getNextPageUrl());
         }
 
+        SeleniumUtils.close(chromeDriver);
         return dtoList;
     }
 
     /**
      * 게시글 본문으로 이동
      * @param chromeDriver
-     * @param keyword
      */
-    private static void moveArticle(WebDriver chromeDriver, String keyword) {
+    private static void moveArticle(WebDriver chromeDriver) {
         // 첫번째 게시글 본문 링크 조회
         // 해당 글 링크로 이동
-        chromeDriver.get(getFirstArticleLink(chromeDriver, keyword));
+        chromeDriver.get(getFirstArticleLink(chromeDriver));
     }
 
     /**
      * 키워드로 검색한 게시글 중 첫번째 게시글 링크 조회
      * @param chromeDriver
-     * @param keyword
      * @return
      */
-    private static String getFirstArticleLink(WebDriver chromeDriver, String keyword) {
+    private static String getFirstArticleLink(WebDriver chromeDriver) {
         // 전체 게시글 목록 크롤링
         // 게시글 목록 중 첫번째 글
-        WebElement firstPost = getParentElement(chromeDriver, keyword)
+        WebElement firstPost = getParentElement(chromeDriver)
                 .findElement(By.cssSelector(CSS_SELECTOR_BY_FIRST_POST));
         // 첫 번째 게시글의 링크 가져오기
         return firstPost.getAttribute("href");
     }
 
-    /**
-     * 주식게시판 (키워드 검색)
-     * @param chromeDriver
-     * @param keyword
-     * @return
-     */
-    private static WebElement getParentElement(WebDriver chromeDriver, String keyword) {
-        return SeleniumUtils.getParentElement(FmKoreaStockEnum.getFullUrl(keyword), FmKoreaStockEnum.FIRST_CLASSNAME.getValue(), chromeDriver);
+    private static WebElement getParentElement(WebDriver chromeDriver) {
+        return SeleniumUtils.getParentElement(FmKoreaStockEnum.POPULAR_URL.getValue(), FmKoreaStockEnum.POPULAR_CLASSNAME.getValue(), chromeDriver);
     }
 }

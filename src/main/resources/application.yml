@@ -40,12 +40,6 @@ logging.level:
     springframework:
       cache: TRACE;
 
-# Chrome Driver
-#mysender:
-#  chrome:
-#    driver:
-#      path: classpath:chromedriver
-
 ---
 
 # prod
@@ -89,9 +83,3 @@ logging.level:
   org:
     springframework:
       cache: TRACE;
-
-# Chrome Driver
-#mysender:
-#  chrome:
-#    driver:
-#      path: classpath:chromedriver

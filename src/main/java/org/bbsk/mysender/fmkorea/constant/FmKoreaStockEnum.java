@@ -13,7 +13,10 @@ public enum FmKoreaStockEnum {
 
     PREV_URL("https://www.fmkorea.com/search.php?mid=stock&listStyle=list&search_keyword="),
     NEXT_URL("&search_target=title_content&page=1"),
-    FIRST_CLASSNAME("bd_lst");
+    FIRST_CLASSNAME("bd_lst"),
+
+    POPULAR_URL("https://www.fmkorea.com/index.php?mid=stock&sort_index=pop&order_type=desc"),
+    POPULAR_CLASSNAME("fm_best_widget");
 
     private final String value;
 

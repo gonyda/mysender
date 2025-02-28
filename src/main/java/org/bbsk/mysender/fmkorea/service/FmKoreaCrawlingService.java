@@ -17,12 +17,10 @@ import java.util.List;
 @Slf4j
 public class FmKoreaCrawlingService {
 
-    private final static int CRAWLING_TIME = 2; // 게시글 크롤링 시간 범위 (스케줄링 시간 범위)
-
-    public static final String CSS_SELECTOR_BY_TITLE = ".top_area h1 .np_18px_span";
-    private final static String CSS_SELECTOR_BY_CONTENT = ".xe_content";
-    public static final String CSS_SELECTOR_BY_CREATED_TIME = ".top_area .date";
-    public static final String CSS_SELECTOR_BY_NEXT_POST = ".prev_next_btns .next a";
+    private static final String CSS_SELECTOR_BY_TITLE = ".top_area h1 .np_18px_span";
+    private static final String CSS_SELECTOR_BY_CONTENT = ".xe_content";
+    private static final String CSS_SELECTOR_BY_CREATED_TIME = ".top_area .date";
+    private static final String CSS_SELECTOR_BY_NEXT_POST = ".prev_next_btns .next a";
 
     /**
      * 게시글 본문 크롤링
@@ -33,12 +31,12 @@ public class FmKoreaCrawlingService {
      * @param now
      * @return
      */
-    public ContentCrawlingDto getContentCrawling(WebDriver chromeDriver, String keyword, LocalDateTime now) {
+    public ContentCrawlingDto getContentCrawling(WebDriver chromeDriver, String keyword, LocalDateTime now, int crawlingTime) {
         // 1. 작성 시간 크롤링
         String createdTime = getCratedTime(chromeDriver.findElement(By.cssSelector(CSS_SELECTOR_BY_CREATED_TIME)));
 
         // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
-        if(isBeforeTwoHoursAgo(now, createdTime)) {
+        if(isBeforeTwoHoursAgo(now, createdTime, crawlingTime)) {
             return ContentCrawlingDto.builder()
                     .isDuplicated(true)
                     .build();
@@ -98,10 +96,10 @@ public class FmKoreaCrawlingService {
         return element.getText().trim();
     }
 
-    private static boolean isBeforeTwoHoursAgo(LocalDateTime now, String timeStr) {
+    private static boolean isBeforeTwoHoursAgo(LocalDateTime now, String timeStr, int crawlingTime) {
         // 게시글 작성시간이 2시간 전보다 이전인지 비교
         return LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"))
-                .isBefore(now.minusHours(CRAWLING_TIME));
+                .isBefore(now.minusHours(crawlingTime));
     }
 
 }
