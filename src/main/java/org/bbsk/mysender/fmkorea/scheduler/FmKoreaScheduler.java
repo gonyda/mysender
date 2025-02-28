@@ -13,6 +13,7 @@ import org.bbsk.mysender.gmail.service.GmailService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class FmKoreaScheduler {
     /**
      * 크롤링 스케줄러
      */
-    @Scheduled(cron = "0 37 * * * ?")
+    @Scheduled(cron = "0 09 * * * ?")
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
         List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
 
@@ -38,19 +39,21 @@ public class FmKoreaScheduler {
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
         keywordList.forEach(keyword ->
                 mailList.add(
-                        fmKoreaService.getFmKoreaCrawlingBySearchKeywordToStock(SeleniumUtils.getChromeDriver(), keyword.getKeyword())
+                        fmKoreaService.getFmKoreaCrawlingBySearchKeywordToStock(
+                                SeleniumUtils.getChromeDriver()
+                                , keyword.getKeyword()
+                                , LocalDateTime.now()
+                        )
                 )
         );
         log.info("## End Crawling");
 
-        if(!mailList.isEmpty()) {
-            for (List<FmKoreaMailDto> mail : mailList) {
+        mailList.forEach(mail ->
                 gmailService.sendEmail(
                         "bbsk3939@gmail.com"
                         , StringUtils.join(mail.get(0).getKeyword(), " 검색결과 ", mail.size(), "개")
-                        , fmKoreaMailTemplateService.getHtmlForSendMail(mail));
-            }
-        }
+                        , fmKoreaMailTemplateService.getHtmlForSendMail(mail))
+        );
 
         log.info("## End");
     }
