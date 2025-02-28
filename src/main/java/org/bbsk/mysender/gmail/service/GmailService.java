@@ -32,7 +32,6 @@ public class GmailService {
             helper.setFrom("bbsk3939@gmail.com");
 
             mailSender.send(message);
-            log.info("## Mail 발송 성공!");
         } catch (MessagingException e) {
             log.error(e.getMessage());
         }

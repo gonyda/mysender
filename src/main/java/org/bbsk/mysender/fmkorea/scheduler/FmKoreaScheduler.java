@@ -30,30 +30,34 @@ public class FmKoreaScheduler {
     /**
      * 크롤링 스케줄러
      */
-    @Scheduled(cron = "0 09 * * * ?")
+    @Scheduled(cron = "0 35 * * * ?")
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
-        List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
-
         log.info("## Start");
+        LocalDateTime now = LocalDateTime.now();
+
+        List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
         log.info("## Keyword List: {}", StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toArray(), ", "));
+
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
         keywordList.forEach(keyword ->
                 mailList.add(
                         fmKoreaService.getFmKoreaCrawlingBySearchKeywordToStock(
                                 SeleniumUtils.getChromeDriver()
                                 , keyword.getKeyword()
-                                , LocalDateTime.now()
+                                , now
                         )
                 )
         );
         log.info("## End Crawling");
 
-        mailList.forEach(mail ->
-                gmailService.sendEmail(
-                        "bbsk3939@gmail.com"
-                        , StringUtils.join(mail.get(0).getKeyword(), " 검색결과 ", mail.size(), "개")
-                        , fmKoreaMailTemplateService.getHtmlForSendMail(mail))
-        );
+        for (List<FmKoreaMailDto> mail : mailList) {
+            gmailService.sendEmail(
+                    "bbsk3939@gmail.com"
+                    , StringUtils.join(mail.get(0).getKeyword(), " 검색결과 ", mail.size(), "개")
+                    , fmKoreaMailTemplateService.getHtmlForSendMail(mail)
+            );
+            log.info("## Send Email: {}", mail.get(0).getKeyword());
+        }
 
         log.info("## End");
     }
