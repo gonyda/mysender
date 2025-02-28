@@ -72,7 +72,7 @@ spring:
       on-profile: prod
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://${DB_HOSTNAME}:${DB_PORT}/mysender?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mariadb://${DB_HOSTNAME}:${DB_PORT}/mysender
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
