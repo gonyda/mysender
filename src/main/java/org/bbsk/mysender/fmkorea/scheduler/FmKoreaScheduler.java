@@ -30,7 +30,7 @@ public class FmKoreaScheduler {
     /**
      * 크롤링 스케줄러
      */
-    @Scheduled(cron = "0 35 * * * ?")
+    @Scheduled(cron = "* * /2 * * ?")
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
         log.info("## Start");
         LocalDateTime now = LocalDateTime.now();
