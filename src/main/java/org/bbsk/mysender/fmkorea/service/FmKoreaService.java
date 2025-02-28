@@ -2,7 +2,6 @@ package org.bbsk.mysender.fmkorea.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bbsk.mysender.annotation.MeasureExecutionTime;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
@@ -11,14 +10,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 @Slf4j
 @RequiredArgsConstructor
 public class FmKoreaService {
@@ -37,7 +34,6 @@ public class FmKoreaService {
      * @param now
      * @return
      */
-    @MeasureExecutionTime
     public List<FmKoreaMailDto> getFmKoreaCrawlingBySearchKeywordToStock(WebDriver chromeDriver, String keyword, LocalDateTime now) {
         log.info("## Current Keyword: {}", keyword);
 

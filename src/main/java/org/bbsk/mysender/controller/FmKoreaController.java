@@ -2,8 +2,7 @@ package org.bbsk.mysender.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.bbsk.mysender.fmkorea.entity.FmKoreaSearchKeyword;
-import org.bbsk.mysender.fmkorea.repository.FmKoreaSearchKeywordRepository;
+import org.bbsk.mysender.fmkorea.constant.FmKoreaSearchKeyword;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,11 +14,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FmKoreaController {
 
-    private final FmKoreaSearchKeywordRepository fmKoreaSearchKeywordRepository;
+    private final FmKoreaSearchKeyword fmKoreaSearchKeywordService;
 
     @GetMapping("/keyword-list")
     public String test() {
-        List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordRepository.getFmKoreaSearchKeywordByUseYn("Y");
-        return StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toArray(), ", ");
+        List<String> keywordList = fmKoreaSearchKeywordService. getKeywordList();
+        return StringUtils.join(keywordList, ", ");
     }
 }
