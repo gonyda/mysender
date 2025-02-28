@@ -1,4 +1,4 @@
-package org.bbsk.mysender.fmkorea.constant;
+package org.bbsk.mysender.fmkorea.dto;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Getter
 public class FmKoreaSearchKeyword {
 
     public List<String> keywordList = new ArrayList<>();
@@ -18,10 +19,6 @@ public class FmKoreaSearchKeyword {
 
     public void removeKeyword(String keyword) {
         keywordList.remove(keyword);
-    }
-
-    public List<String> getKeywordList() {
-        return keywordList;
     }
 
     @PostConstruct

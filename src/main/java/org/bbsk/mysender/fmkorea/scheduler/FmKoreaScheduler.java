@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
-import org.bbsk.mysender.fmkorea.constant.FmKoreaSearchKeyword;
+import org.bbsk.mysender.fmkorea.dto.FmKoreaSearchKeyword;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
 import org.bbsk.mysender.fmkorea.service.FmKoreaService;
 import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
