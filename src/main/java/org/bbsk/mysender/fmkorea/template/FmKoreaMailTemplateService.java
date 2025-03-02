@@ -31,25 +31,25 @@ public class FmKoreaMailTemplateService {
         sb.append("<div class=\"email-container\">");
         for (FmKoreaMailDto article : articles) {
             sb.append("<div class=\"email-post\">");
-            sb.append("<div class=\"email-header\">");
-            // 제목
-            sb.append("<a href=\"").append(article.getLink()).append("\" style=\"color: black\">")
-                    .append(addHighlight(article.getTitle(), article.getKeyword()))
-                    .append("</a> ");
-            // 작성시간
-            sb.append("<span class=\"email-time\">").append(article.getCreatedTime()).append("</span>");
-            sb.append("</div>");
-            // 글 본문
-            sb.append("<div class=\"email-body\">").append(addHighlight(article.getContent(), article.getKeyword()))
-                    .append("</div>");
-            // 이미지 출력
-            if(article.getImageUrlList() != null && !article.getImageUrlList().isEmpty()) {
-                sb.append("<div class=\"email-image\">");
-                for (String imgUrl : article.getImageUrlList()) {
-                    sb.append("<img src=\"").append(imgUrl).append("\">");
-                }
+                sb.append("<div class=\"email-header\">");
+                // 제목
+                    sb.append("<a href=\"").append(article.getLink()).append("\" style=\"color: black\">")
+                            .append(addHighlight(article.getTitle(), article.getKeyword()))
+                            .append("</a> ");
+                    // 작성시간
+                    sb.append("<span class=\"email-time\">").append(article.getCreatedTime()).append("</span>");
                 sb.append("</div>");
-            }
+                // 글 본문
+                sb.append("<div class=\"email-body\">").append(addHighlight(article.getContent(), article.getKeyword()))
+                        .append("</div>");
+                // 이미지 출력
+                if(article.getImageUrlList() != null && !article.getImageUrlList().isEmpty()) {
+                    sb.append("<div class=\"email-image\">");
+                    for (String imgUrl : article.getImageUrlList()) {
+                        sb.append("<img src=\"").append(imgUrl).append("\">");
+                    }
+                    sb.append("</div>");
+                }
             sb.append("</div>");
         }
         sb.append("</div>");
@@ -60,11 +60,19 @@ public class FmKoreaMailTemplateService {
     }
 
     private static String addHighlight(String text, String keyword) {
-        if(StringUtils.contains(text, keyword)) {
-            return text.replaceAll("\n", "<br>")
-                       .replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
-        } else {
-            return text.replaceAll("\n", "<br>");
+        if (text == null) {
+            return "";
         }
+
+        // 공백 처리 및 태그 출력 문제 해결
+        text = text.replaceAll("\\s*<br>\\s*", "\n") // 이미 존재하는 <br> 태그를 개행 문자로 변환 (있다면)
+                   .replaceAll("\n", "<br>");       // 개행 문자 변환
+
+        if (StringUtils.isNotEmpty(keyword)) {
+            // 키워드 강조 추가
+            text = text.replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
+        }
+
+        return text;
     }
 }

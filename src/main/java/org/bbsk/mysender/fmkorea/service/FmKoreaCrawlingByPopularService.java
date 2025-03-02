@@ -49,6 +49,9 @@ public class FmKoreaCrawlingByPopularService {
         }
 
         SeleniumUtils.close(chromeDriver);
+
+        log.info("## End Crawling");
+
         return dtoList;
     }
 

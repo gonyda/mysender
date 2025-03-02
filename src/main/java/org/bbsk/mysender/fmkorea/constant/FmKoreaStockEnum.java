@@ -11,10 +11,12 @@ import org.apache.commons.lang3.StringUtils;
 @RequiredArgsConstructor
 public enum FmKoreaStockEnum {
 
+    // 키워드 검색
     PREV_URL("https://www.fmkorea.com/search.php?mid=stock&listStyle=list&search_keyword="),
     NEXT_URL("&search_target=title_content&page=1"),
     FIRST_CLASSNAME("bd_lst"),
 
+    // 인기글
     POPULAR_URL("https://www.fmkorea.com/index.php?mid=stock&sort_index=pop&order_type=desc"),
     POPULAR_CLASSNAME("fm_best_widget");
 

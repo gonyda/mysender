@@ -61,6 +61,9 @@ public class FmKoreaCrawlingByKeywordSearchService {
         }
 
         SeleniumUtils.close(chromeDriver);
+
+        log.info("## End Crawling");
+
         return dtoList;
     }
 

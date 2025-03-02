@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
-import org.bbsk.mysender.fmkorea.dto.FmKoreaSearchKeyword;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
+import org.bbsk.mysender.fmkorea.jpa.entity.FmKoreaSearchKeyword;
+import org.bbsk.mysender.fmkorea.jpa.service.FmKoreaJpaService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByKeywordSearchService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByPopularService;
 import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
@@ -27,7 +28,7 @@ public class FmKoreaScheduler {
 
     private final GmailService gmailService;
     private final FmKoreaMailTemplateService fmKoreaMailTemplateService;
-    private final FmKoreaSearchKeyword searchKeyword;
+    private final FmKoreaJpaService fmKoreaJpaService;
 
     /**
      * 주식 게시판
@@ -35,27 +36,24 @@ public class FmKoreaScheduler {
      * 크롤링 스케줄러
      */
     @Scheduled(cron = "0 0 */2 * * ?")
-//    @Scheduled(cron = "0 31 * * * ?")
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
         log.info("## Search Keyword Start");
         LocalDateTime now = LocalDateTime.now();
 
-        List<String> keywordList = searchKeyword.getKeywordList();
-        log.info("## Keyword List: {}", StringUtils.join(keywordList, ", "));
+        List<FmKoreaSearchKeyword> keywordList = fmKoreaJpaService.getFmKoreaSearchKeywordByUseYn("Y");
+        log.info("## Keyword List: {}", StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toList(), ", "));
 
         List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
-        keywordList.forEach(keyword ->
+        keywordList.forEach(entity ->
                 mailList.add(
                         fmKoreaCrawlingByKeywordSearchService.getFmKoreaCrawlingBySearchKeywordToStock(
                                 SeleniumUtils.getChromeDriver()
-                                , keyword
+                                , entity.getKeyword()
                                 , now
                                 , 2
                         )
                 )
         );
-
-        log.info("## End Crawling");
 
         for (List<FmKoreaMailDto> mail : mailList) {
             gmailService.sendEmail(
@@ -75,8 +73,7 @@ public class FmKoreaScheduler {
      * 인기글
      * 크롤링 스케줄러
      */
-    @Scheduled(cron = "0 0 */3 * * ?")
-//    @Scheduled(cron = "0 54 * * * ?")
+    @Scheduled(cron = "0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * ?")
     public void getFmKoreaCrawlingByPopularToStock() {
         log.info("## Popular Start");
         LocalDateTime now = LocalDateTime.now();
@@ -85,10 +82,9 @@ public class FmKoreaScheduler {
                 fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(
                         SeleniumUtils.getChromeDriver()
                         , now
-                        , 3
+                        , 2
                 );
 
-        log.info("## End Crawling");
 
         gmailService.sendEmail(
                 "bbsk3939@gmail.com"
