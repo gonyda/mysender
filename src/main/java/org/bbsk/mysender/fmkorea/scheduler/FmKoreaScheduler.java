@@ -73,7 +73,8 @@ public class FmKoreaScheduler {
      * 인기글
      * 크롤링 스케줄러
      */
-    @Scheduled(cron = "0 0 */3 * * ?")
+//    @Scheduled(cron = "0 0 */3 * * ?")
+    @Scheduled(cron = "0 */10 * * * ?")
     public void getFmKoreaCrawlingByPopularToStock() {
         log.info("## Popular Start");
         LocalDateTime now = LocalDateTime.now();
