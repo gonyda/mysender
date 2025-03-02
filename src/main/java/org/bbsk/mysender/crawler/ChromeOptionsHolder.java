@@ -1,5 +1,6 @@
 package org.bbsk.mysender.crawler;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.chrome.ChromeOptions;
 
@@ -14,6 +15,7 @@ public enum ChromeOptionsHolder {
     }
 
     private static ChromeOptions create() {
+        WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("disable-infobars"); // 정보 표시줄 비활성화
         options.addArguments("--disable-extensions"); // 확장 프로그램 비활성화
