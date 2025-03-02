@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
-import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
+import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.bbsk.mysender.fmkorea.jpa.entity.FmKoreaSearchKeyword;
 import org.bbsk.mysender.fmkorea.jpa.service.FmKoreaJpaService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByKeywordSearchService;
@@ -43,7 +43,7 @@ public class FmKoreaScheduler {
         List<FmKoreaSearchKeyword> keywordList = fmKoreaJpaService.getFmKoreaSearchKeywordByUseYn("Y");
         log.info("## Keyword List: {}", StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toList(), ", "));
 
-        List<List<FmKoreaMailDto>> mailList = new ArrayList<>();
+        List<List<FmKoreaArticleDto>> mailList = new ArrayList<>(); // List By Keyword
         keywordList.forEach(entity ->
                 mailList.add(
                         fmKoreaCrawlingByKeywordSearchService.getFmKoreaCrawlingBySearchKeywordToStock(
@@ -55,13 +55,13 @@ public class FmKoreaScheduler {
                 )
         );
 
-        for (List<FmKoreaMailDto> mail : mailList) {
+        for (List<FmKoreaArticleDto> articleList : mailList) {
             gmailService.sendEmail(
                     "bbsk3939@gmail.com"
-                    , StringUtils.join(mail.get(0).getKeyword(), " 검색결과 ", mail.size(), "개")
-                    , fmKoreaMailTemplateService.getHtmlForSendMail(mail)
+                    , StringUtils.join(articleList.get(0).getKeyword(), " 검색결과 ", articleList.size(), "개")
+                    , fmKoreaMailTemplateService.getHtmlForSendMail(articleList)
             );
-            log.info("## Send Email: {}", mail.get(0).getKeyword());
+            log.info("## Send Email: {}", articleList.get(0).getKeyword());
         }
 
         log.info("## Search Keyword End");
@@ -78,23 +78,20 @@ public class FmKoreaScheduler {
         log.info("## Popular Start");
         LocalDateTime now = LocalDateTime.now();
 
-        List<FmKoreaMailDto> mailList =
+        List<FmKoreaArticleDto> articleList =
                 fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(
                         SeleniumUtils.getChromeDriver()
                         , now
                         , 2
                 );
 
-
         gmailService.sendEmail(
                 "bbsk3939@gmail.com"
-                , StringUtils.join("인기글 검색결과 ", mailList.size(), "개")
-                , fmKoreaMailTemplateService.getHtmlForSendMail(mailList));
+                , StringUtils.join("인기글 검색결과 ", articleList.size(), "개")
+                , fmKoreaMailTemplateService.getHtmlForSendMail(articleList));
 
         log.info("## Send Email: 인기글");
 
         log.info("## Popular End");
     }
-
-
 }

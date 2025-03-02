@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-public class FmKoreaMailDto {
+public class FmKoreaArticleDto {
     private String keyword;
     private String title;
     private String createdTime;

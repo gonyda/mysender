@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
-import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
+import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -25,13 +25,13 @@ public class FmKoreaCrawlingByPopularService {
     public static final String CSS_SELECTOR_BY_FIRST_POST = ".fm_best_widget ul li:first-child h3.title a";
 
 
-    public List<FmKoreaMailDto> getFmKoreaCrawlingByPopularToStock(WebDriver chromeDriver, LocalDateTime now, int crawlingTime) {
+    public List<FmKoreaArticleDto> getFmKoreaCrawlingByPopularToStock(WebDriver chromeDriver, LocalDateTime now, int crawlingTime) {
         // 첫번째 게시글 본문으로 이동
         moveArticle(chromeDriver);
 
         // 본문 글 크롤링
         int workCnt = 0;
-        List<FmKoreaMailDto> dtoList = new ArrayList<>();
+        List<FmKoreaArticleDto> dtoList = new ArrayList<>();
         while (true) {
             ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver, "", now, crawlingTime);
 

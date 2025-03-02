@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
-import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
+import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -34,7 +34,7 @@ public class FmKoreaCrawlingByKeywordSearchService {
      * @param now
      * @return
      */
-    public List<FmKoreaMailDto> getFmKoreaCrawlingBySearchKeywordToStock
+    public List<FmKoreaArticleDto> getFmKoreaCrawlingBySearchKeywordToStock
         (WebDriver chromeDriver, String keyword, LocalDateTime now, int crawlingTime) {
         log.info("## Current Keyword: {}", keyword);
 
@@ -43,7 +43,7 @@ public class FmKoreaCrawlingByKeywordSearchService {
 
         // 본문 글 크롤링
         int workCnt = 0;
-        List<FmKoreaMailDto> dtoList = new ArrayList<>();
+        List<FmKoreaArticleDto> dtoList = new ArrayList<>();
         while (true) {
             ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver, keyword, now, crawlingTime);
 

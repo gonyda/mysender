@@ -3,7 +3,7 @@ package org.bbsk.mysender.fmkorea.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
-import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
+import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -57,7 +57,7 @@ public class FmKoreaCrawlingService {
 
         return ContentCrawlingDto.builder()
                 .isDuplicated(false)
-                .mailDto(FmKoreaMailDto.builder()
+                .mailDto(FmKoreaArticleDto.builder()
                         .keyword(keyword)
                         .link(chromeDriver.getCurrentUrl())
                         .title(title)

@@ -10,6 +10,6 @@ import lombok.*;
 public class ContentCrawlingDto {
 
     private boolean isDuplicated;
-    private FmKoreaMailDto mailDto;
+    private FmKoreaArticleDto mailDto;
     private String nextPageUrl;
 }

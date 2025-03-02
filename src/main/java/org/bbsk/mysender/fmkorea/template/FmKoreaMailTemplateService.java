@@ -1,7 +1,7 @@
 package org.bbsk.mysender.fmkorea.template;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bbsk.mysender.fmkorea.dto.FmKoreaMailDto;
+import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public class FmKoreaMailTemplateService {
 
-    public String getHtmlForSendMail(List<FmKoreaMailDto> articles) {
+    public String getHtmlForSendMail(List<FmKoreaArticleDto> articles) {
         StringBuilder sb = new StringBuilder();
         sb.append("<!DOCTYPE html>");
         sb.append("<html lang=\"ko\">");
@@ -29,7 +29,7 @@ public class FmKoreaMailTemplateService {
         sb.append("</head>");
         sb.append("<body>");
         sb.append("<div class=\"email-container\">");
-        for (FmKoreaMailDto article : articles) {
+        for (FmKoreaArticleDto article : articles) {
             sb.append("<div class=\"email-post\">");
                 sb.append("<div class=\"email-header\">");
                 // 제목
