@@ -5,7 +5,7 @@ spring:
       on-profile: local
   datasource:
       driver-class-name: org.mariadb.jdbc.Driver
-      url: jdbc:mariadb://localhost:3306/mysender?useUnicode=true&characterEncoding=UTF-8
+      url: jdbc:mariadb://localhost:3306/mysender
       username: ${DB_USERNAME}
       password: ${DB_PASSWORD}
   jpa:
