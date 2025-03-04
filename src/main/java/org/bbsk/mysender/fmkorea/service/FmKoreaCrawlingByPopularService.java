@@ -40,7 +40,7 @@ public class FmKoreaCrawlingByPopularService {
                 break;
             }
 
-            dtoList.add(crawlingDto.mailDto());
+            dtoList.add(crawlingDto.fmKoreaArticleDto());
             workCnt++;
             log.info("## Crawled {} posts", workCnt);
 

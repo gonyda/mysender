@@ -57,7 +57,7 @@ public class FmKoreaCrawlingService {
 
         return ContentCrawlingDto.builder()
                 .isDuplicated(false)
-                .mailDto(FmKoreaArticleDto.builder()
+                .fmKoreaArticleDto(FmKoreaArticleDto.builder()
                         .keyword(keyword)
                         .link(chromeDriver.getCurrentUrl())
                         .title(title)
