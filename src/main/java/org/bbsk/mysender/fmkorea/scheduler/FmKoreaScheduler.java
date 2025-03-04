@@ -58,10 +58,10 @@ public class FmKoreaScheduler {
         for (List<FmKoreaArticleDto> articleList : mailList) {
             gmailService.sendEmail(
                     "bbsk3939@gmail.com"
-                    , StringUtils.join(articleList.get(0).getKeyword(), " 검색결과 ", articleList.size(), "개")
+                    , StringUtils.join(articleList.get(0).keyword(), " 검색결과 ", articleList.size(), "개")
                     , fmKoreaMailTemplateService.getHtmlForSendMail(articleList)
             );
-            log.info("## Send Email: {}", articleList.get(0).getKeyword());
+            log.info("## Send Email: {}", articleList.get(0).keyword());
         }
 
         log.info("## Search Keyword End");

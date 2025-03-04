@@ -40,12 +40,12 @@ public class FmKoreaCrawlingByPopularService {
                 break;
             }
 
-            dtoList.add(crawlingDto.getMailDto());
+            dtoList.add(crawlingDto.mailDto());
             workCnt++;
             log.info("## Crawled {} posts", workCnt);
 
             // 다음 글 이동
-            chromeDriver.get(crawlingDto.getNextPageUrl());
+            chromeDriver.get(crawlingDto.nextPageUrl());
         }
 
         SeleniumUtils.close(chromeDriver);
