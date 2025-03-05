@@ -5,10 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
-import org.bbsk.mysender.fmkorea.jpa.entity.FmKoreaSearchKeyword;
-import org.bbsk.mysender.fmkorea.jpa.service.FmKoreaJpaService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByKeywordSearchService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByPopularService;
+import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
 import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
 import org.bbsk.mysender.gmail.service.GmailService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,7 +27,7 @@ public class FmKoreaScheduler {
 
     private final GmailService gmailService;
     private final FmKoreaMailTemplateService fmKoreaMailTemplateService;
-    private final FmKoreaJpaService fmKoreaJpaService;
+    private final FmKoreaKeywordService fmKoreaKeywordService;
 
     /**
      * 주식 게시판
@@ -40,15 +39,15 @@ public class FmKoreaScheduler {
         log.info("## Search Keyword Start");
         LocalDateTime now = LocalDateTime.now();
 
-        List<FmKoreaSearchKeyword> keywordList = fmKoreaJpaService.getFmKoreaSearchKeywordByUseYn("Y");
-        log.info("## Keyword List: {}", StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toList(), ", "));
+        List<String> keywordList = fmKoreaKeywordService.getKeywordList();
+        log.info("## Keyword List: {}", StringUtils.join(keywordList, ", "));
 
         List<List<FmKoreaArticleDto>> mailList = new ArrayList<>(); // List By Keyword
-        keywordList.forEach(entity ->
+        keywordList.forEach(keyword ->
                 mailList.add(
                         fmKoreaCrawlingByKeywordSearchService.getFmKoreaCrawlingBySearchKeywordToStock(
                                 SeleniumUtils.getChromeDriver()
-                                , entity.getKeyword()
+                                , keyword
                                 , now
                                 , 2
                         )

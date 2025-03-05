@@ -2,8 +2,7 @@ package org.bbsk.mysender.fmkorea.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.bbsk.mysender.fmkorea.jpa.entity.FmKoreaSearchKeyword;
-import org.bbsk.mysender.fmkorea.jpa.service.FmKoreaJpaService;
+import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,25 +15,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FmKoreaController {
 
-    private final FmKoreaJpaService fmKoreaSearchKeywordService;
+    public final FmKoreaKeywordService fmKoreaSearchKeywordService;
 
     @GetMapping("/get")
     public String get() {
-        List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordService.getFmKoreaSearchKeywordByUseYn("Y");
-        return StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toList(), ", ");
+        return StringUtils.join(fmKoreaSearchKeywordService.getKeywordList(), ", ");
     }
 
     @GetMapping("/add/{keyword}")
     public String addKeyword(@PathVariable String keyword) {
-        fmKoreaSearchKeywordService.addFmKoreaSearchKeyword(keyword);
-        List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordService.getFmKoreaSearchKeywordByUseYn("Y");
-        return StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toList(), ", ");
+        fmKoreaSearchKeywordService.addKeyword(keyword);
+        return StringUtils.join(fmKoreaSearchKeywordService.getKeywordList(), ", ");
     }
 
     @GetMapping("/remove/{keyword}")
     public String removeKeyword(@PathVariable String keyword) {
-        fmKoreaSearchKeywordService.removeFmKoreaSearchKeyword(keyword);
-        List<FmKoreaSearchKeyword> keywordList = fmKoreaSearchKeywordService.getFmKoreaSearchKeywordByUseYn("Y");
-        return StringUtils.join(keywordList.stream().map(FmKoreaSearchKeyword::getKeyword).toList(), ", ");
+        fmKoreaSearchKeywordService.removeKeyword(keyword);
+        return StringUtils.join(fmKoreaSearchKeywordService.getKeywordList(), ", ");
     }
 }
