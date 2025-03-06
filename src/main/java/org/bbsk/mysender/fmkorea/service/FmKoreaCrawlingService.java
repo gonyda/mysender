@@ -23,7 +23,38 @@ public class FmKoreaCrawlingService {
     private static final String CSS_SELECTOR_BY_NEXT_POST = ".prev_next_btns .next a";
 
     /**
-     * 게시글 본문 크롤링
+     * 인기글 크롤링
+     *
+     * @param chromeDriver
+     * @return
+     */
+    public ContentCrawlingDto getContentCrawling(WebDriver chromeDriver) {
+        // 1. 작성 시간 크롤링
+        String createdTime = getCratedTime(chromeDriver.findElement(By.cssSelector(CSS_SELECTOR_BY_CREATED_TIME)));
+
+        // 2. 제목 크롤링
+        String title = getTitle(chromeDriver.findElement(By.cssSelector(CSS_SELECTOR_BY_TITLE)));
+
+        // 3. 본문 내용 크롤링
+        WebElement contentElement =  chromeDriver.findElement(By.cssSelector(CSS_SELECTOR_BY_CONTENT));
+        String content = getContent(contentElement);
+
+        // 4. 이미지가 있는지 확인
+        List<String> imgUrlList = getImgUrlList(contentElement);
+
+        return ContentCrawlingDto.builder()
+                .fmKoreaArticleDto(FmKoreaArticleDto.builder()
+                        .link(chromeDriver.getCurrentUrl())
+                        .title(title)
+                        .content(content)
+                        .createdTime(createdTime)
+                        .imageUrlList(imgUrlList)
+                        .build())
+                        .build();
+    }
+
+    /**
+     * 키워드 검색 - 게시글 본문 크롤링
      * 작성시간, 타이틀, 본문, 이미지, 다음글 링크
      *
      * @param chromeDriver
@@ -101,5 +132,6 @@ public class FmKoreaCrawlingService {
         return LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"))
                 .isBefore(now.minusHours(crawlingTime));
     }
+
 
 }

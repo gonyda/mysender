@@ -10,73 +10,81 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
+import java.time.LocalTime;
+import java.time.Duration;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class FmKoreaCrawlingByPopularService {
 
+    public static final String CSS_SELECTOR_BY_FIRST_POST = "div.fm_best_widget ul li";
+
     private final FmKoreaCrawlingService fmKoreaCrawlingService;
 
-    public static final String CSS_SELECTOR_BY_FIRST_POST = ".fm_best_widget ul li:first-child h3.title a";
 
-
-    public List<FmKoreaArticleDto> getFmKoreaCrawlingByPopularToStock(WebDriver chromeDriver, LocalDateTime now, int crawlingTime) {
-        // 첫번째 게시글 본문으로 이동
-        moveArticle(chromeDriver);
-
-        // 본문 글 크롤링
-        int workCnt = 0;
-        List<FmKoreaArticleDto> dtoList = new ArrayList<>();
-        while (true) {
-            ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver, "", now, crawlingTime);
-
-            // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
-            if(crawlingDto.isDuplicated()) {
-                break;
-            }
-
-            dtoList.add(crawlingDto.fmKoreaArticleDto());
-            workCnt++;
-            log.info("## Crawled {} posts", workCnt);
-
-            // 다음 글 이동
-            chromeDriver.get(crawlingDto.nextPageUrl());
-        }
+    /**
+     * 인기글 크롤링
+     *
+     * @param chromeDriver
+     * @param now
+     * @param crawlingTime 스케줄러 시간 -> 분 변환
+     * @return
+     */
+    public List<FmKoreaArticleDto> getFmKoreaCrawlingByPopularToStock(WebDriver chromeDriver, LocalTime now, long crawlingTime) {
+        AtomicInteger workCnt = new AtomicInteger();
+        List<FmKoreaArticleDto> dtoList = getCrawlingToArticles(chromeDriver, crawlingTime, now)
+                .stream()
+                .map(link -> {
+                    chromeDriver.get(link);
+                    ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver);
+                    log.info("## Crawled {} posts", workCnt.incrementAndGet());
+                    return crawlingDto.fmKoreaArticleDto();
+                })
+                .collect(Collectors.toList());
 
         SeleniumUtils.close(chromeDriver);
-
         log.info("## End Crawling");
 
         return dtoList;
     }
 
     /**
-     * 게시글 본문으로 이동
+     * 크롤링 시간 기준 크롤링 할 인기글 조회
+     *
      * @param chromeDriver
+     * @param crawlingTime
+     * @param now
+     * @return
      */
-    private static void moveArticle(WebDriver chromeDriver) {
-        // 첫번째 게시글 본문 링크 조회
-        // 해당 글 링크로 이동
-        chromeDriver.get(getFirstArticleLink(chromeDriver));
+    private static List<String> getCrawlingToArticles(WebDriver chromeDriver, long crawlingTime, LocalTime now) {
+        return getParentElement(chromeDriver)
+                .findElements(By.cssSelector(CSS_SELECTOR_BY_FIRST_POST))
+                .stream()
+                // takeWhile은 스트림을 순회하면서 조건이 false가 되는 순간 이후 요소들은 모두 무시
+                .takeWhile(article -> !isOverByCrawlingTime(crawlingTime, now, article))
+                .map(article -> article.findElement(By.cssSelector("h3.title a")).getAttribute("href"))
+                .collect(Collectors.toList());
     }
 
     /**
-     * 키워드로 검색한 게시글 중 첫번째 게시글 링크 조회
-     * @param chromeDriver
+     * 크롤링 시간보다 오래 된 게시글 여부 파악
+     * @param crawlingTime 분
+     * @param now 스케줄러 동작 시간
+     * @param article 게시글
      * @return
      */
-    private static String getFirstArticleLink(WebDriver chromeDriver) {
-        // 전체 게시글 목록 크롤링
-        // 게시글 목록 중 첫번째 글
-        WebElement firstPost = getParentElement(chromeDriver)
-                .findElement(By.cssSelector(CSS_SELECTOR_BY_FIRST_POST));
-        // 첫 번째 게시글의 링크 가져오기
-        return firstPost.getAttribute("href");
+    private static boolean isOverByCrawlingTime(long crawlingTime, LocalTime now, WebElement article) {
+        // 시간 가져오기
+        String articleTime = article.findElement(By.cssSelector("div > div > span.regdate")).getText().trim();
+        // 현재시간 기준 세시간 전 게시글인지
+        Duration duration = Duration.between(LocalTime.parse(articleTime), now);
+        return duration.toMinutes() > crawlingTime;
     }
 
     private static WebElement getParentElement(WebDriver chromeDriver) {

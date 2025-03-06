@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,25 +73,26 @@ public class FmKoreaScheduler {
      * 인기글
      * 크롤링 스케줄러
      */
-//    @Scheduled(cron = "0 0 */3 * * ?")
-    @Scheduled(cron = "0 */10 * * * ?")
+    @Scheduled(cron = "0 0 */3 * * ?")
     public void getFmKoreaCrawlingByPopularToStock() {
         log.info("## Popular Start");
-        LocalDateTime now = LocalDateTime.now();
+        LocalTime now = LocalTime.now();
 
         List<FmKoreaArticleDto> articleList =
                 fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(
                         SeleniumUtils.getChromeDriver()
                         , now
-                        , 2
+                        , 180L
                 );
 
-        gmailService.sendEmail(
-                "bbsk3939@gmail.com"
-                , StringUtils.join("인기글 검색결과 ", articleList.size(), "개")
-                , fmKoreaMailTemplateService.getHtmlForSendMail(articleList));
+        if (!articleList.isEmpty()) {
+            gmailService.sendEmail(
+                    "bbsk3939@gmail.com"
+                    , StringUtils.join("인기글 검색결과 ", articleList.size(), "개")
+                    , fmKoreaMailTemplateService.getHtmlForSendMail(articleList));
 
-        log.info("## Send Email: 인기글");
+            log.info("## Send Email: 인기글");
+        }
 
         log.info("## Popular End");
     }
