@@ -51,34 +51,6 @@
             <scope>test</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-jpa</artifactId>-->
-<!--        </dependency>-->
-
-<!--        &lt;!&ndash; QueryDsl &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.querydsl</groupId>-->
-<!--            <artifactId>querydsl-apt</artifactId>-->
-<!--            <version>5.0.0</version>-->
-<!--            <classifier>jakarta</classifier>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.querydsl</groupId>-->
-<!--            <artifactId>querydsl-jpa</artifactId>-->
-<!--            <version>5.0.0</version>-->
-<!--            <classifier>jakarta</classifier>-->
-<!--        </dependency>-->
-
-<!--        &lt;!&ndash; maria DB &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.mariadb.jdbc</groupId>-->
-<!--            <artifactId>mariadb-java-client</artifactId>-->
-<!--            <version>3.3.1</version> &lt;!&ndash; 최신 버전 확인 필요 &ndash;&gt;-->
-<!--        </dependency>-->
-
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
