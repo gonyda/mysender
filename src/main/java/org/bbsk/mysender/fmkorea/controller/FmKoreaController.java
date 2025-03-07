@@ -39,4 +39,14 @@ public class FmKoreaController {
         scheduler.getFmKoreaCrawlingByPopularToStock();
         return "ok";
     }
+
+    /**
+     * 키워드 검색
+     * @return
+     */
+    @GetMapping("/")
+    public String home() {
+        scheduler.getFmKoreaCrawlingBySearchKeywordToStock();
+        return "WELCOME my-sender!";
+    }
 }

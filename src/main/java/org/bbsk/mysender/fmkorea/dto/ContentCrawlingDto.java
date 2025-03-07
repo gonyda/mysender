@@ -9,9 +9,9 @@ public class ContentCrawlingDto {
     private final String nextPageUrl;
 
     private ContentCrawlingDto(Builder builder) {
-        this.isDuplicated = false;
-        this.fmKoreaArticleDto = null;
-        this.nextPageUrl = null;
+        this.isDuplicated = builder.isDuplicated;
+        this.fmKoreaArticleDto = builder.fmKoreaArticleDto;
+        this.nextPageUrl = builder.nextPageUrl;
     }
 
     public static Builder builder() {
