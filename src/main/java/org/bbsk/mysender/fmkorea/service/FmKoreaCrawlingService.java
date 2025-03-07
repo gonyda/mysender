@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * 본문 크롤링 서비스
+ */
 @Service
 @Slf4j
 public class FmKoreaCrawlingService {

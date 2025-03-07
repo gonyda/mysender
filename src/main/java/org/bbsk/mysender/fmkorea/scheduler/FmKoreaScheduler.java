@@ -10,6 +10,7 @@ import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByPopularService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
 import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
 import org.bbsk.mysender.gmail.service.GmailService;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@EnableScheduling
 @RequiredArgsConstructor
 @Slf4j
 public class FmKoreaScheduler {
@@ -58,10 +60,10 @@ public class FmKoreaScheduler {
         for (List<FmKoreaArticleDto> articleList : mailList) {
             gmailService.sendEmail(
                     "bbsk3939@gmail.com"
-                    , StringUtils.join(articleList.get(0).keyword(), " 검색결과 ", articleList.size(), "개")
+                    , StringUtils.join(articleList.get(0).getKeyword(), " 검색결과 ", articleList.size(), "개")
                     , fmKoreaMailTemplateService.getHtmlForSendMail(articleList)
             );
-            log.info("## Send Email: {}", articleList.get(0).keyword());
+            log.info("## Send Email: {}", articleList.get(0).getKeyword());
         }
 
         log.info("## Search Keyword End");

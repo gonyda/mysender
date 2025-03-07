@@ -1,6 +1,5 @@
 package org.bbsk.mysender.fmkorea.service;
 
-import org.checkerframework.checker.units.qual.K;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

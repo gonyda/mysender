@@ -1,14 +1,10 @@
 package org.bbsk.mysender.fmkorea.constant;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * 에펨코리아 - 주식게시판
  */
-@Getter
-@RequiredArgsConstructor
 public enum FmKoreaStockEnum {
 
     // 키워드 검색
@@ -22,9 +18,17 @@ public enum FmKoreaStockEnum {
 
     private final String value;
 
+    FmKoreaStockEnum(String value) {
+        this.value = value;
+    }
+
     public static String getFullUrl(String keyword) {
         return StringUtils.join(PREV_URL.getValue()
                                 , keyword
                                 , NEXT_URL.getValue());
+    }
+
+    public String getValue() {
+        return value;
     }
 }

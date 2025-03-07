@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.time.Duration;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FmKoreaCrawlingByPopularService {
 
-    public static final String CSS_SELECTOR_BY_FIRST_POST = "div.fm_best_widget ul li";
+    private static final String CSS_SELECTOR_BY_POST_LIST = "div.fm_best_widget ul li";
 
     private final FmKoreaCrawlingService fmKoreaCrawlingService;
 
@@ -44,7 +43,7 @@ public class FmKoreaCrawlingByPopularService {
                     chromeDriver.get(link);
                     ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver);
                     log.info("## Crawled {} posts", workCnt.incrementAndGet());
-                    return crawlingDto.fmKoreaArticleDto();
+                    return crawlingDto.getFmKoreaArticleDto();
                 })
                 .collect(Collectors.toList());
 
@@ -64,7 +63,7 @@ public class FmKoreaCrawlingByPopularService {
      */
     private static List<String> getCrawlingToArticles(WebDriver chromeDriver, long crawlingTime, LocalTime now) {
         return getParentElement(chromeDriver)
-                .findElements(By.cssSelector(CSS_SELECTOR_BY_FIRST_POST))
+                .findElements(By.cssSelector(CSS_SELECTOR_BY_POST_LIST))
                 .stream()
                 // takeWhile은 스트림을 순회하면서 조건이 false가 되는 순간 이후 요소들은 모두 무시
                 .takeWhile(article -> !isOverByCrawlingTime(crawlingTime, now, article))

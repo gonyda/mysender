@@ -22,7 +22,7 @@ public class FmKoreaCrawlingByKeywordSearchService {
 
     private final FmKoreaCrawlingService fmKoreaCrawlingService;
 
-    public static final String CSS_SELECTOR_BY_FIRST_POST = "td.title.hotdeal_var8 a:not(.replyNum)";
+    private static final String CSS_SELECTOR_BY_FIRST_POST = "td.title.hotdeal_var8 a:not(.replyNum)";
 
     /**
      * 에펨코리아 - 주식 게시판 - 키워드 검색
@@ -53,12 +53,12 @@ public class FmKoreaCrawlingByKeywordSearchService {
                 break;
             }
 
-            dtoList.add(crawlingDto.fmKoreaArticleDto());
+            dtoList.add(crawlingDto.getFmKoreaArticleDto());
             workCnt++;
             log.info("## Crawled {} posts", workCnt);
 
             // 다음 글 이동
-            chromeDriver.get(crawlingDto.nextPageUrl());
+            chromeDriver.get(crawlingDto.getNextPageUrl());
         }
 
         SeleniumUtils.close(chromeDriver);

@@ -32,20 +32,20 @@ public class FmKoreaMailTemplateService {
         for (FmKoreaArticleDto article : articles) {
             sb.append("<div class=\"email-post\">");
                 sb.append("<div class=\"email-header\">");
-                // 제목
-                    sb.append("<a href=\"").append(article.link()).append("\" style=\"color: black\">")
-                            .append(addHighlight(article.title(), article.keyword()))
+                    // 제목
+                    sb.append("<a href=\"").append(article.getLink()).append("\" style=\"color: black\">")
+                            .append(addHighlight(article.getTitle(), article.getKeyword()))
                             .append("</a> ");
                     // 작성시간
-                    sb.append("<span class=\"email-time\">").append(article.createdTime()).append("</span>");
+                    sb.append("<span class=\"email-time\">").append(article.getCreatedTime()).append("</span>");
                 sb.append("</div>");
                 // 글 본문
-                sb.append("<div class=\"email-body\">").append(addHighlight(article.content(), article.keyword()))
+                sb.append("<div class=\"email-body\">").append(addHighlight(article.getContent(), article.getKeyword()))
                         .append("</div>");
                 // 이미지 출력
-                if(article.imageUrlList() != null && !article.imageUrlList().isEmpty()) {
+                if(article.getImageUrlList() != null && !article.getImageUrlList().isEmpty()) {
                     sb.append("<div class=\"email-image\">");
-                    for (String imgUrl : article.imageUrlList()) {
+                    for (String imgUrl : article.getImageUrlList()) {
                         sb.append("<img src=\"").append(imgUrl).append("\">");
                     }
                     sb.append("</div>");
