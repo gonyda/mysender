@@ -1,10 +1,8 @@
 package org.bbsk.mysender.fmkorea.dto;
 
-import lombok.Getter;
 
 import java.util.List;
 
-@Getter
 public class FmKoreaArticleDto {
     private final String keyword;
     private final String title;
@@ -12,6 +10,30 @@ public class FmKoreaArticleDto {
     private final String link;
     private final String content;
     private final List<String> imageUrlList;
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public List<String> getImageUrlList() {
+        return imageUrlList;
+    }
 
     private FmKoreaArticleDto(Builder builder) {
         this.keyword = builder.keyword;

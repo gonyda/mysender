@@ -1,12 +1,21 @@
 package org.bbsk.mysender.fmkorea.dto;
 
-import lombok.Getter;
-
-@Getter
 public class ContentCrawlingDto {
     private final boolean isDuplicated;
     private final FmKoreaArticleDto fmKoreaArticleDto;
     private final String nextPageUrl;
+
+    public boolean isDuplicated() {
+        return isDuplicated;
+    }
+
+    public FmKoreaArticleDto getFmKoreaArticleDto() {
+        return fmKoreaArticleDto;
+    }
+
+    public String getNextPageUrl() {
+        return nextPageUrl;
+    }
 
     private ContentCrawlingDto(Builder builder) {
         this.isDuplicated = builder.isDuplicated;

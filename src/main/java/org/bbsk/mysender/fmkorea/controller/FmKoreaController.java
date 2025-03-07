@@ -1,7 +1,5 @@
 package org.bbsk.mysender.fmkorea.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.fmkorea.scheduler.FmKoreaScheduler;
 import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
@@ -12,12 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/fm-korea")
-@RequiredArgsConstructor
-@Slf4j
 public class FmKoreaController {
 
     private final FmKoreaKeywordService fmKoreaSearchKeywordService;
     private final FmKoreaScheduler scheduler;
+
+    public FmKoreaController(FmKoreaKeywordService fmKoreaSearchKeywordService, FmKoreaScheduler scheduler) {
+        this.fmKoreaSearchKeywordService = fmKoreaSearchKeywordService;
+        this.scheduler = scheduler;
+    }
 
     @GetMapping("/get")
     public String get() {

@@ -1,7 +1,6 @@
 package org.bbsk.mysender.fmkorea.service;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.openqa.selenium.By;
@@ -17,7 +16,6 @@ import java.util.List;
  * 본문 크롤링 서비스
  */
 @Service
-@Slf4j
 public class FmKoreaCrawlingService {
 
     private static final String CSS_SELECTOR_BY_TITLE = ".top_area h1 .np_18px_span";

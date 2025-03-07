@@ -1,7 +1,5 @@
 package org.bbsk.mysender.fmkorea.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
@@ -9,6 +7,8 @@ import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.time.Duration;
@@ -18,13 +18,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class FmKoreaCrawlingByPopularService {
+
+    private static final Logger log = LoggerFactory.getLogger(FmKoreaCrawlingByPopularService.class);
 
     private static final String CSS_SELECTOR_BY_POST_LIST = "div.fm_best_widget ul li";
 
     private final FmKoreaCrawlingService fmKoreaCrawlingService;
+
+    public FmKoreaCrawlingByPopularService(FmKoreaCrawlingService fmKoreaCrawlingService) {
+        this.fmKoreaCrawlingService = fmKoreaCrawlingService;
+    }
 
 
     /**

@@ -1,7 +1,5 @@
 package org.bbsk.mysender.fmkorea.scheduler;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
@@ -10,6 +8,8 @@ import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByPopularService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
 import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
 import org.bbsk.mysender.gmail.service.GmailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,16 +21,23 @@ import java.util.List;
 
 @Component
 @EnableScheduling
-@RequiredArgsConstructor
-@Slf4j
 public class FmKoreaScheduler {
+
+    private static final Logger log = LoggerFactory.getLogger(FmKoreaScheduler.class);
 
     private final FmKoreaCrawlingByKeywordSearchService fmKoreaCrawlingByKeywordSearchService;
     private final FmKoreaCrawlingByPopularService fmKoreaCrawlingByPopularService;
-
     private final GmailService gmailService;
     private final FmKoreaMailTemplateService fmKoreaMailTemplateService;
     private final FmKoreaKeywordService fmKoreaKeywordService;
+
+    public FmKoreaScheduler(FmKoreaCrawlingByKeywordSearchService fmKoreaCrawlingByKeywordSearchService, FmKoreaCrawlingByPopularService fmKoreaCrawlingByPopularService, GmailService gmailService, FmKoreaMailTemplateService fmKoreaMailTemplateService, FmKoreaKeywordService fmKoreaKeywordService) {
+        this.fmKoreaCrawlingByKeywordSearchService = fmKoreaCrawlingByKeywordSearchService;
+        this.fmKoreaCrawlingByPopularService = fmKoreaCrawlingByPopularService;
+        this.gmailService = gmailService;
+        this.fmKoreaMailTemplateService = fmKoreaMailTemplateService;
+        this.fmKoreaKeywordService = fmKoreaKeywordService;
+    }
 
     /**
      * 주식 게시판
@@ -40,6 +47,7 @@ public class FmKoreaScheduler {
     @Scheduled(cron = "0 0 */2 * * ?")
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
         log.info("## Search Keyword Start");
+
         LocalDateTime now = LocalDateTime.now();
 
         List<String> keywordList = fmKoreaKeywordService.getKeywordList();
