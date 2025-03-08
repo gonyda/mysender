@@ -14,7 +14,7 @@ public enum FmKoreaStockEnum {
 
     // 인기글
     POPULAR_URL("https://www.fmkorea.com/index.php?mid=stock&sort_index=pop&order_type=desc"),
-    POPULAR_CLASSNAME("fm_best_widget");
+    POPULAR_CLASSNAME(".fm_best_widget");
 
     private final String value;
 

@@ -1,6 +1,7 @@
 package org.bbsk.mysender.fmkorea.scheduler;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bbsk.mysender.crawler.PlayWrightUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByKeywordSearchService;
@@ -90,7 +91,7 @@ public class FmKoreaScheduler {
 
         List<FmKoreaArticleDto> articleList =
                 fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(
-                        SeleniumUtils.getChromeDriver()
+                        PlayWrightUtils.getBrowser()
                         , now
                         , 180L
                 );

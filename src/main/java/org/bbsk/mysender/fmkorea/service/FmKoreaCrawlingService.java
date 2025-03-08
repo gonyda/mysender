@@ -1,22 +1,31 @@
 package org.bbsk.mysender.fmkorea.service;
 
 
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 본문 크롤링 서비스
  */
 @Service
 public class FmKoreaCrawlingService {
+
+    private static final Logger log = LoggerFactory.getLogger(FmKoreaCrawlingService.class);
 
     private static final String CSS_SELECTOR_BY_TITLE = ".top_area h1 .np_18px_span";
     private static final String CSS_SELECTOR_BY_CONTENT = ".xe_content";
@@ -26,32 +35,36 @@ public class FmKoreaCrawlingService {
     /**
      * 인기글 크롤링
      *
-     * @param chromeDriver
+     * @param page
      * @return
      */
-    public ContentCrawlingDto getContentCrawling(WebDriver chromeDriver) {
+    public ContentCrawlingDto getContentCrawling(Page page) {
         // 1. 작성 시간 크롤링
-        String createdTime = getCratedTime(chromeDriver.findElement(By.cssSelector(CSS_SELECTOR_BY_CREATED_TIME)));
-
+        String createdTime = page.locator("div.top_area span.date").innerText();
         // 2. 제목 크롤링
-        String title = getTitle(chromeDriver.findElement(By.cssSelector(CSS_SELECTOR_BY_TITLE)));
-
+        String title = page.locator("h1.np_18px > span.np_18px_span").innerText();
         // 3. 본문 내용 크롤링
-        WebElement contentElement =  chromeDriver.findElement(By.cssSelector(CSS_SELECTOR_BY_CONTENT));
-        String content = getContent(contentElement);
-
+        String content = page.locator("div.rd_body div.xe_content").innerText();
         // 4. 이미지가 있는지 확인
-        List<String> imgUrlList = getImgUrlList(contentElement);
+        List<String> imgUrlList = new ArrayList<>();
+        Locator images = page.locator("div.rd_body div.xe_content img");
+        for (int i = 0; i < images.count(); i++) {
+            String imgSrc = images.nth(i).getAttribute("src");
+            if(imgSrc.startsWith("//")){
+                imgSrc = "https:" + imgSrc;
+            }
+            imgUrlList.add(imgSrc);
+        }
 
         return ContentCrawlingDto.builder()
                 .fmKoreaArticleDto(FmKoreaArticleDto.builder()
-                        .link(chromeDriver.getCurrentUrl())
+                        .link(page.url())
                         .title(title)
                         .content(content)
                         .createdTime(createdTime)
                         .imageUrlList(imgUrlList)
                         .build())
-                        .build();
+                .build();
     }
 
     /**
