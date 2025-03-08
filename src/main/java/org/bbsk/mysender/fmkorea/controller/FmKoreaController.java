@@ -1,5 +1,6 @@
 package org.bbsk.mysender.fmkorea.controller;
 
+import com.microsoft.playwright.Playwright;
 import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.fmkorea.scheduler.FmKoreaScheduler;
 import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
@@ -35,19 +36,5 @@ public class FmKoreaController {
         return StringUtils.join(fmKoreaSearchKeywordService.removeKeyword(keyword), ", ");
     }
 
-    @GetMapping("/test")
-    public String test() {
-        scheduler.getFmKoreaCrawlingByPopularToStock();
-        return "ok";
-    }
 
-    /**
-     * 키워드 검색
-     * @return
-     */
-    @GetMapping("/")
-    public String home() {
-        scheduler.getFmKoreaCrawlingBySearchKeywordToStock();
-        return "WELCOME my-sender!";
-    }
 }
