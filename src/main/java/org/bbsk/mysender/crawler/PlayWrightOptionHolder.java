@@ -34,7 +34,8 @@ public enum PlayWrightOptionHolder {
                         "--disable-infobars",
                         "--disable-notifications",
                         "--disable-default-apps",
-                        "--mute-audio"
+                        "--mute-audio",
+                        "--disable-blink-features=AutomationControlled"
                 ));
     }
 

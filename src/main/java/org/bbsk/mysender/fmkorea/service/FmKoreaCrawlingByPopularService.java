@@ -1,6 +1,6 @@
 package org.bbsk.mysender.fmkorea.service;
 
-import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import org.bbsk.mysender.crawler.PlayWrightUtils;
@@ -11,14 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.time.LocalTime;
 import java.time.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 public class FmKoreaCrawlingByPopularService {
@@ -40,7 +38,7 @@ public class FmKoreaCrawlingByPopularService {
      * @param crawlingTime 스케줄러 시간 -> 분 변환
      * @return
      */
-    public List<FmKoreaArticleDto> getFmKoreaCrawlingByPopularToStock(Browser browser, LocalTime now, long crawlingTime) {
+    public List<FmKoreaArticleDto> getFmKoreaCrawlingByPopularToStock(BrowserContext browser, LocalTime now, long crawlingTime) {
         AtomicInteger workCnt = new AtomicInteger();
 
         List<FmKoreaArticleDto> dtoList = getCrawlingToArticles(browser, crawlingTime, now)
@@ -68,7 +66,7 @@ public class FmKoreaCrawlingByPopularService {
      * @param now
      * @return
      */
-    private static List<String> getCrawlingToArticles(Browser browser, long crawlingTime, LocalTime now) {
+    private static List<String> getCrawlingToArticles(BrowserContext browser, long crawlingTime, LocalTime now) {
         Locator parentElement = getParentElement(browser);
 
         // 게시글 리스트 항목들 추출
@@ -105,7 +103,7 @@ public class FmKoreaCrawlingByPopularService {
         return duration.toMinutes() > crawlingTime;
     }
 
-    private static Locator getParentElement(Browser browser) {
+    private static Locator getParentElement(BrowserContext browser) {
         Page page = browser.newPage();
         page.navigate(FmKoreaStockEnum.POPULAR_URL.getValue());
         return page.locator(FmKoreaStockEnum.POPULAR_CLASSNAME.getValue());
