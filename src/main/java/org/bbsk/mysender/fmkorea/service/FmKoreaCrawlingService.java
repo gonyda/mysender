@@ -44,7 +44,7 @@ public class FmKoreaCrawlingService {
         // 2. 제목 크롤링
         String title = page.locator("h1.np_18px > span.np_18px_span").innerText();
         // 3. 본문 내용 크롤링
-        String content = page.locator("div.rd_body div.xe_content").innerText();
+        String content = page.locator("div.rd_body div.xe_content").innerText().trim();
         // 4. 이미지가 있는지 확인
         List<String> imgUrlList = new ArrayList<>();
         Locator images = page.locator("div.rd_body div.xe_content img");

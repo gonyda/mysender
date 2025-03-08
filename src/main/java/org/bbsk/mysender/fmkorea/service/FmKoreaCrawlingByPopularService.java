@@ -55,6 +55,7 @@ public class FmKoreaCrawlingByPopularService {
 
         log.info("## End Crawling");
 
+        PlayWrightUtils.close(browser);
         return dtoList;
     }
 
@@ -68,7 +69,7 @@ public class FmKoreaCrawlingByPopularService {
      */
     private static List<String> getCrawlingToArticles(BrowserContext browser, long crawlingTime, LocalTime now) {
         Locator parentElement = getParentElement(browser);
-
+        log.info("content: {}", parentElement.innerText());
         // 게시글 리스트 항목들 추출
         List<Locator> articles = parentElement.locator("ul > li.li").all();
 
@@ -106,6 +107,7 @@ public class FmKoreaCrawlingByPopularService {
     private static Locator getParentElement(BrowserContext browser) {
         Page page = browser.newPage();
         page.navigate(FmKoreaStockEnum.POPULAR_URL.getValue());
+        log.info("## url: {}", page.url());
         return page.locator(FmKoreaStockEnum.POPULAR_CLASSNAME.getValue());
     }
 }
