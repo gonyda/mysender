@@ -1,9 +1,10 @@
-package org.bbsk.mysender.fmkorea.service;
+package org.bbsk.mysender.fmkorea.service.keyword;
 
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
+import org.bbsk.mysender.fmkorea.service.FmKoreaContentCrawlingService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -22,10 +23,10 @@ public class FmKoreaCrawlingByKeywordSearchService {
 
     private static final String CSS_SELECTOR_BY_FIRST_POST = "td.title.hotdeal_var8 a:not(.replyNum)";
 
-    private final FmKoreaCrawlingService fmKoreaCrawlingService;
+    private final FmKoreaContentCrawlingService fmKoreaContentCrawlingService;
 
-    public FmKoreaCrawlingByKeywordSearchService(FmKoreaCrawlingService fmKoreaCrawlingService) {
-        this.fmKoreaCrawlingService = fmKoreaCrawlingService;
+    public FmKoreaCrawlingByKeywordSearchService(FmKoreaContentCrawlingService fmKoreaContentCrawlingService) {
+        this.fmKoreaContentCrawlingService = fmKoreaContentCrawlingService;
     }
 
     /**
@@ -50,7 +51,7 @@ public class FmKoreaCrawlingByKeywordSearchService {
         int workCnt = 0;
         List<FmKoreaArticleDto> dtoList = new ArrayList<>();
         while (true) {
-            ContentCrawlingDto crawlingDto = fmKoreaCrawlingService.getContentCrawling(chromeDriver, keyword, now, crawlingTime);
+            ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingService.getContentCrawling(chromeDriver, keyword, now, crawlingTime);
 
             // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
             if(crawlingDto.isDuplicated()) {

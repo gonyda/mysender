@@ -1,11 +1,10 @@
 package org.bbsk.mysender.fmkorea.scheduler;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bbsk.mysender.crawler.PlayWrightUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
-import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByKeywordSearchService;
-import org.bbsk.mysender.fmkorea.service.FmKoreaCrawlingByPopularService;
+import org.bbsk.mysender.fmkorea.service.keyword.FmKoreaCrawlingByKeywordSearchService;
+import org.bbsk.mysender.fmkorea.service.popular.FmKoreaCrawlingByPopularService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
 import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
 import org.bbsk.mysender.gmail.service.GmailService;
@@ -87,14 +86,8 @@ public class FmKoreaScheduler {
     @Scheduled(cron = "0 0 */3 * * ?")
     public void getFmKoreaCrawlingByPopularToStock() {
         log.info("## Popular Start");
-        LocalTime now = LocalTime.now();
-
         List<FmKoreaArticleDto> articleList =
-                fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(
-                        PlayWrightUtils.getBrowser()
-                        , now
-                        , 180L
-                );
+                fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(LocalTime.now(), 180L);
 
         if (!articleList.isEmpty()) {
             gmailService.sendEmail(

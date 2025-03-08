@@ -1,7 +1,6 @@
 package org.bbsk.mysender.fmkorea.service;
 
 
-import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
@@ -14,18 +13,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 본문 크롤링 서비스
  */
 @Service
-public class FmKoreaCrawlingService {
+public class FmKoreaContentCrawlingService {
 
-    private static final Logger log = LoggerFactory.getLogger(FmKoreaCrawlingService.class);
+    private static final Logger log = LoggerFactory.getLogger(FmKoreaContentCrawlingService.class);
 
     private static final String CSS_SELECTOR_BY_TITLE = ".top_area h1 .np_18px_span";
     private static final String CSS_SELECTOR_BY_CONTENT = ".xe_content";
@@ -40,21 +36,12 @@ public class FmKoreaCrawlingService {
      */
     public ContentCrawlingDto getContentCrawling(Page page) {
         // 1. 작성 시간 크롤링
-        String createdTime = page.locator("div.top_area span.date").innerText();
+        String createdTime = page.waitForSelector("div.top_area span.date").innerText();
         // 2. 제목 크롤링
-        String title = page.locator("h1.np_18px > span.np_18px_span").innerText();
-        // 3. 본문 내용 크롤링
-        String content = page.locator("div.rd_body div.xe_content").innerText().trim();
-        // 4. 이미지가 있는지 확인
-        List<String> imgUrlList = new ArrayList<>();
-        Locator images = page.locator("div.rd_body div.xe_content img");
-        for (int i = 0; i < images.count(); i++) {
-            String imgSrc = images.nth(i).getAttribute("src");
-            if(imgSrc.startsWith("//")){
-                imgSrc = "https:" + imgSrc;
-            }
-            imgUrlList.add(imgSrc);
-        }
+        String title = page.waitForSelector("h1.np_18px > span.np_18px_span").innerText();
+        // 3. 본문 내용 크롤링 (HTML 포함)
+        // 이미지, 동영상 등 template service 에서 처리
+        String content = page.waitForSelector("div.rd_body div.xe_content").innerHTML().trim();
 
         return ContentCrawlingDto.builder()
                 .fmKoreaArticleDto(FmKoreaArticleDto.builder()
@@ -62,7 +49,6 @@ public class FmKoreaCrawlingService {
                         .title(title)
                         .content(content)
                         .createdTime(createdTime)
-                        .imageUrlList(imgUrlList)
                         .build())
                 .build();
     }
