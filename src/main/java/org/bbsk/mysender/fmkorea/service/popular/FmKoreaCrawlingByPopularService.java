@@ -5,7 +5,6 @@ import org.bbsk.mysender.crawler.PlayWrightUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
-import org.bbsk.mysender.fmkorea.service.FmKoreaContentCrawlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,12 +18,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class FmKoreaCrawlingByPopularService {
 
+    public static final String SELECTOR_ARTICLE_LIST = "div.fm_best_widget._bd_pc ul li";
+    public static final String SELECTOR_ARTICLE_LINK = "h3.title a";
+    public static final String SELECTOR_ARTICLE_POSTING_TIME = "span.regdate";
+
     private static final Logger log = LoggerFactory.getLogger(FmKoreaCrawlingByPopularService.class);
 
-    private final FmKoreaContentCrawlingService fmKoreaContentCrawlingService;
+    private final FmKoreaContentCrawlingByPopularService fmKoreaContentCrawlingByPopularService;
 
-    public FmKoreaCrawlingByPopularService(FmKoreaContentCrawlingService fmKoreaContentCrawlingService) {
-        this.fmKoreaContentCrawlingService = fmKoreaContentCrawlingService;
+    public FmKoreaCrawlingByPopularService(FmKoreaContentCrawlingByPopularService fmKoreaContentCrawlingByPopularService) {
+        this.fmKoreaContentCrawlingByPopularService = fmKoreaContentCrawlingByPopularService;
     }
 
     /**
@@ -63,7 +66,7 @@ public class FmKoreaCrawlingByPopularService {
         return linkList.stream()
                 .map(link -> {
                     mainPage.navigate(FmKoreaStockEnum.BASE_URL.getValue() + link);
-                    ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingService.getContentCrawling(mainPage);
+                    ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingByPopularService.getContentCrawling(mainPage);
                     log.info("## 인기글 Crawled {} posts", workCnt.incrementAndGet());
                     return crawlingDto.getFmKoreaArticleDto();
                 }).toList();
@@ -82,10 +85,10 @@ public class FmKoreaCrawlingByPopularService {
         mainPage.navigate(FmKoreaStockEnum.POPULAR_URL.getValue());
 
         // 대상 요소가 로드될 때까지 대기
-        mainPage.waitForSelector("div.fm_best_widget._bd_pc ul li");
+        mainPage.waitForSelector(SELECTOR_ARTICLE_LIST);
 
         // li 태그들을 모두 선택하여 링크와 작성시간 추출
-        List<String> linkList = mainPage.querySelectorAll("div.fm_best_widget._bd_pc ul li")
+        List<String> linkList = mainPage.querySelectorAll(SELECTOR_ARTICLE_LIST)
                 .stream()
                 .takeWhile(li -> !isOverByCrawlingTime(crawlingTime, now, getPostingTime(li)))
                 .map(FmKoreaCrawlingByPopularService::getLink).toList();
@@ -114,7 +117,7 @@ public class FmKoreaCrawlingByPopularService {
      */
     private static String getLink(ElementHandle li) {
         // 게시글 본문 링크 추출
-        return li.querySelector("h3.title a").getAttribute("href");
+        return li.querySelector(SELECTOR_ARTICLE_LINK).getAttribute("href");
     }
 
     /**
@@ -124,6 +127,6 @@ public class FmKoreaCrawlingByPopularService {
      */
     private static String getPostingTime(ElementHandle li) {
         // 작성시간 추출: span.regdate의 innerText
-        return li.querySelector("span.regdate").innerText().trim();
+        return li.querySelector(SELECTOR_ARTICLE_POSTING_TIME).innerText().trim();
     }
 }

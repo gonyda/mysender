@@ -6,7 +6,6 @@ import org.bbsk.mysender.crawler.PlayWrightUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
-import org.bbsk.mysender.fmkorea.service.FmKoreaContentCrawlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,11 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FmKoreaCrawlingByKeywordSearchService {
 
     private static final Logger log = LoggerFactory.getLogger(FmKoreaCrawlingByKeywordSearchService.class);
+    public static final String SELECTOR_FIRST_ARTICLE = "tbody > tr:not(.notice) td.title a.hx";
 
-    private final FmKoreaContentCrawlingService fmKoreaContentCrawlingService;
+    private final FmKoreaContentCrawlingByKeywordService fmKoreaContentCrawlingByKeywordService;
 
-    public FmKoreaCrawlingByKeywordSearchService(FmKoreaContentCrawlingService fmKoreaContentCrawlingService) {
-        this.fmKoreaContentCrawlingService = fmKoreaContentCrawlingService;
+    public FmKoreaCrawlingByKeywordSearchService(FmKoreaContentCrawlingByKeywordService fmKoreaContentCrawlingByKeywordService) {
+        this.fmKoreaContentCrawlingByKeywordService = fmKoreaContentCrawlingByKeywordService;
     }
 
     /**
@@ -49,7 +49,7 @@ public class FmKoreaCrawlingByKeywordSearchService {
         // 본문 글 크롤링
         List<FmKoreaArticleDto> dtoList = new ArrayList<>();
         while (true) {
-            ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingService.getContentCrawling(page, keyword, now, crawlingTime);
+            ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingByKeywordService.getContentCrawling(page, keyword, now, crawlingTime);
 
             // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
             if(crawlingDto.isOverByTime()) {
@@ -90,7 +90,7 @@ public class FmKoreaCrawlingByKeywordSearchService {
         // 크롤링 URL 이동
         page.navigate(FmKoreaStockEnum.getFullUrl(keyword));
         // 첫 게시글 링크 조회
-        return page.waitForSelector("tbody > tr:not(.notice) td.title a.hx").getAttribute("href");
+        return page.waitForSelector(SELECTOR_FIRST_ARTICLE).getAttribute("href");
     }
 
 }
