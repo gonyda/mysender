@@ -35,13 +35,13 @@ public class FmKoreaMailTemplateService {
                     sb.append("<div class=\"email-header\">");
                         // 제목
                         sb.append("<a href=\"").append(article.getLink()).append("\" style=\"color: black\">")
-                                .append(setFormatContent(article.getTitle(), article.getKeyword()))
+                                .append(article.getTitle())
                                 .append("</a> ");
                         // 작성시간
                         sb.append("<span class=\"email-time\">").append(article.getPostingTime()).append("</span>");
                     sb.append("</div>");
                     // 글 본문
-                    sb.append("<div class=\"email-body\">").append(setFormatContent(article.getContent(), article.getKeyword())).append("</div>");
+                    sb.append("<div class=\"email-body\">").append(setFormatContent(article.getContent())).append("</div>");
                 sb.append("</div>");
             }
             sb.append("</div>");
@@ -50,7 +50,7 @@ public class FmKoreaMailTemplateService {
         return sb.toString();
     }
 
-    private static String setFormatContent(String text, String keyword) {
+    private static String setFormatContent(String text) {
         if (text == null) {
             return "";
         }

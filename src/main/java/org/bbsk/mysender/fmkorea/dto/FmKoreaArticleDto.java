@@ -1,8 +1,6 @@
 package org.bbsk.mysender.fmkorea.dto;
 
 
-import java.util.List;
-
 public class FmKoreaArticleDto {
     private final String keyword;
     private final String title;

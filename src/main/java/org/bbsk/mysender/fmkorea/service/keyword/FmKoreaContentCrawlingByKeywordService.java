@@ -8,6 +8,7 @@ import org.bbsk.mysender.fmkorea.service.FmKoreaCommonContentCrawlingService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class FmKoreaContentCrawlingByKeywordService {
@@ -25,6 +26,7 @@ public class FmKoreaContentCrawlingByKeywordService {
      * @param page
      * @param keyword
      * @param now
+     * @param crawlingTime
      * @return
      */
     public ContentCrawlingDto getContentCrawling(Page page, String keyword, LocalDateTime now, int crawlingTime) {
@@ -32,7 +34,7 @@ public class FmKoreaContentCrawlingByKeywordService {
         String postingTime = fmKoreaCommonContentCrawlingService.getPostingTime(page);
 
         // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
-        if(fmKoreaCommonContentCrawlingService.isBeforeTwoHoursAgo(now, postingTime, crawlingTime)) {
+        if(isBeforeTwoHoursAgo(now, postingTime, crawlingTime)) {
             return ContentCrawlingDto.builder()
                     .isOverByTime(true)
                     .build();
@@ -59,5 +61,11 @@ public class FmKoreaContentCrawlingByKeywordService {
                         .build())
                 .nextPageUrl(FmKoreaStockEnum.BASE_URL.getValue() + nextPageUrl)
                 .build();
+    }
+
+    public boolean isBeforeTwoHoursAgo(LocalDateTime now, String timeStr, int crawlingTime) {
+        // 게시글 작성시간이 2시간 전보다 이전인지 비교
+        return LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"))
+                .isBefore(now.minusHours(crawlingTime));
     }
 }

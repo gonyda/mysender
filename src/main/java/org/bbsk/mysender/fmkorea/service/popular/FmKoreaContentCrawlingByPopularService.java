@@ -5,8 +5,6 @@ import com.microsoft.playwright.Page;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.bbsk.mysender.fmkorea.service.FmKoreaCommonContentCrawlingService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,8 +12,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class FmKoreaContentCrawlingByPopularService {
-
-    private static final Logger log = LoggerFactory.getLogger(FmKoreaContentCrawlingByPopularService.class);
 
     private final FmKoreaCommonContentCrawlingService fmKoreaCommonContentCrawlingService;
 
@@ -44,6 +40,7 @@ public class FmKoreaContentCrawlingByPopularService {
                         .title(title)
                         .content(content)
                         .postingTime(postingTime)
+                        .keyword("인기글")
                         .build())
                 .build();
     }

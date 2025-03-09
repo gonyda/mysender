@@ -4,9 +4,10 @@ import com.microsoft.playwright.Page;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
+/**
+ * fm korea 본문 크롤링
+ */
 @Service
 public class FmKoreaCommonContentCrawlingService {
 
@@ -24,11 +25,5 @@ public class FmKoreaCommonContentCrawlingService {
 
     public String getNextPageUrl(Page page) {
         return page.waitForSelector(".prev_next_btns .next a").getAttribute("href");
-    }
-
-    public boolean isBeforeTwoHoursAgo(LocalDateTime now, String timeStr, int crawlingTime) {
-        // 게시글 작성시간이 2시간 전보다 이전인지 비교
-        return LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"))
-                .isBefore(now.minusHours(crawlingTime));
     }
 }

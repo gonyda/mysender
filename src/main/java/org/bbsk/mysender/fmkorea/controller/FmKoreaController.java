@@ -1,8 +1,6 @@
 package org.bbsk.mysender.fmkorea.controller;
 
-import com.microsoft.playwright.Playwright;
 import org.apache.commons.lang3.StringUtils;
-import org.bbsk.mysender.fmkorea.scheduler.FmKoreaScheduler;
 import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
