@@ -1,7 +1,9 @@
 package org.bbsk.mysender.fmkorea.template;
 
-import org.apache.commons.lang3.StringUtils;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +25,7 @@ public class FmKoreaMailTemplateService {
         sb.append(".email-time {font-size: 12px; color: #777;}");
         sb.append(".email-body {font-size: 16px; color: #444;}");
         sb.append(".email-image {text-align: center; margin-top: 20px; width: 100% !important; height: auto !important;}");
-        sb.append(".highlight { color: darkorange; font-weight: bold; }");
+        sb.append(".search_keyword_bg_yellow, .searchContextDoc { color: darkorange; font-weight: bold; }");
         sb.append("</style>");
         sb.append("</head>");
         sb.append("<body>");
@@ -36,7 +38,7 @@ public class FmKoreaMailTemplateService {
                                 .append(setFormatContent(article.getTitle(), article.getKeyword()))
                                 .append("</a> ");
                         // 작성시간
-                        sb.append("<span class=\"email-time\">").append(article.getCreatedTime()).append("</span>");
+                        sb.append("<span class=\"email-time\">").append(article.getPostingTime()).append("</span>");
                     sb.append("</div>");
                     // 글 본문
                     sb.append("<div class=\"email-body\">").append(setFormatContent(article.getContent(), article.getKeyword())).append("</div>");
@@ -54,16 +56,7 @@ public class FmKoreaMailTemplateService {
         }
         text = setImgTag(text);
         text = setIframeTag(text);
-        text = setHighLightByKeyword(text, keyword);
 
-        return text;
-    }
-
-    private static String setHighLightByKeyword(String text, String keyword) {
-        if (StringUtils.isNotEmpty(keyword)) {
-            // 키워드 강조 추가
-            text = text.replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
-        }
         return text;
     }
 
@@ -76,10 +69,24 @@ public class FmKoreaMailTemplateService {
     }
 
     private static String setImgTag(String text) {
-        // 상대 경로 이미지 수정 (// 로 시작하는 이미지의 경우 https: 추가)
-        text = text.replaceAll("src=\"//", "src=\"https://");
-        // <img> 태그에 class="email-image" 추가
-        text = text.replaceAll("<img ", "<img class=\"email-image\" ");
-        return text;
+        Document doc = Jsoup.parse(text);
+        for (Element img : doc.select("img")) {
+            // 기존의 모든 속성 제거 전에 src 값을 저장
+            String src = img.attr("src");
+            // src가 "//"로 시작하면 "https:"를 추가
+            if (src.startsWith("//")) {
+                src = "https:" + src;
+            }
+
+            // 기존 모든 속성 제거
+            img.clearAttributes();
+
+            // 필요한 속성 추가: src, class
+            img.attr("src", src);
+            img.addClass("email-image");
+        }
+
+        // body 내부의 HTML만 반환
+        return doc.body().html();
     }
 }

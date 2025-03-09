@@ -1,6 +1,7 @@
 package org.bbsk.mysender.fmkorea.scheduler;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bbsk.mysender.crawler.PlayWrightUtils;
 import org.bbsk.mysender.crawler.SeleniumUtils;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.bbsk.mysender.fmkorea.service.keyword.FmKoreaCrawlingByKeywordSearchService;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @EnableScheduling
@@ -48,31 +50,28 @@ public class FmKoreaScheduler {
     public void getFmKoreaCrawlingBySearchKeywordToStock() {
         log.info("## Search Keyword Start");
 
-        LocalDateTime now = LocalDateTime.now();
-
         List<String> keywordList = fmKoreaKeywordService.getKeywordList();
         log.info("## Keyword List: {}", StringUtils.join(keywordList, ", "));
 
-        List<List<FmKoreaArticleDto>> mailList = new ArrayList<>(); // List By Keyword
-        keywordList.forEach(keyword ->
-                mailList.add(
-                        fmKoreaCrawlingByKeywordSearchService.getFmKoreaCrawlingBySearchKeywordToStock(
-                                SeleniumUtils.getChromeDriver()
-                                , keyword
-                                , now
-                                , 2
-                        )
-                )
-        );
+        List<List<FmKoreaArticleDto>> mailListGroupByKeyword = keywordList.stream()
+                        .map(keyword -> fmKoreaCrawlingByKeywordSearchService
+                                .getFmKoreaCrawlingBySearchKeywordToStock(keyword, LocalDateTime.now(), 2))
+                        .toList();
 
-        for (List<FmKoreaArticleDto> articleList : mailList) {
-            gmailService.sendEmail(
-                    "bbsk3939@gmail.com"
-                    , StringUtils.join(articleList.get(0).getKeyword(), " 검색결과 ", articleList.size(), "개")
-                    , fmKoreaMailTemplateService.getHtmlForSendMail(articleList)
-            );
-            log.info("## Send Email: {}", articleList.get(0).getKeyword());
-        }
+
+        Optional.of(mailListGroupByKeyword)
+                .ifPresent(mailList -> {
+                    mailList.stream()
+                            .filter(list -> !list.isEmpty())
+                            .forEach(crawledArticles -> {
+                                gmailService.sendEmail(
+                                        "bbsk3939@gmail.com"
+                                        , StringUtils.join(crawledArticles.get(0).getKeyword(), " 검색결과 ", crawledArticles.size(), "개")
+                                        , fmKoreaMailTemplateService.getHtmlForSendMail(crawledArticles)
+                                );
+                                log.info("## Send Email: {}", crawledArticles.get(0).getKeyword());
+                            });
+                });
 
         log.info("## Search Keyword End");
     }

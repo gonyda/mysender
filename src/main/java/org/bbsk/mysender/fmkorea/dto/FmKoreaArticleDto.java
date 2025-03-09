@@ -6,10 +6,9 @@ import java.util.List;
 public class FmKoreaArticleDto {
     private final String keyword;
     private final String title;
-    private final String createdTime;
+    private final String postingTime;
     private final String link;
     private final String content;
-    private final List<String> imageUrlList;
 
     public String getKeyword() {
         return keyword;
@@ -19,8 +18,8 @@ public class FmKoreaArticleDto {
         return title;
     }
 
-    public String getCreatedTime() {
-        return createdTime;
+    public String getPostingTime() {
+        return postingTime;
     }
 
     public String getLink() {
@@ -31,17 +30,12 @@ public class FmKoreaArticleDto {
         return content;
     }
 
-    public List<String> getImageUrlList() {
-        return imageUrlList;
-    }
-
     private FmKoreaArticleDto(Builder builder) {
         this.keyword = builder.keyword;
         this.title = builder.title;
-        this.createdTime = builder.createdTime;
+        this.postingTime = builder.postingTime;
         this.link = builder.link;
         this.content = builder.content;
-        this.imageUrlList = builder.imageUrlList;
     }
 
     public static Builder builder() {
@@ -51,10 +45,9 @@ public class FmKoreaArticleDto {
     public static class Builder {
         private String keyword;
         private String title;
-        private String createdTime;
+        private String postingTime;
         private String link;
         private String content;
-        private List<String> imageUrlList;
 
         public Builder keyword(String keyword) {
             this.keyword = keyword;
@@ -66,8 +59,8 @@ public class FmKoreaArticleDto {
             return this;
         }
 
-        public Builder createdTime(String createdTime) {
-            this.createdTime = createdTime;
+        public Builder postingTime(String postingTime) {
+            this.postingTime = postingTime;
             return this;
         }
 
@@ -78,11 +71,6 @@ public class FmKoreaArticleDto {
 
         public Builder content(String content) {
             this.content = content;
-            return this;
-        }
-
-        public Builder imageUrlList(List<String> imageUrlList) {
-            this.imageUrlList = imageUrlList;
             return this;
         }
 

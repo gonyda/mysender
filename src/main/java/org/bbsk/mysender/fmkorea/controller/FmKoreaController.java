@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class FmKoreaController {
 
     private final FmKoreaKeywordService fmKoreaSearchKeywordService;
-    private final FmKoreaScheduler scheduler;
 
-    public FmKoreaController(FmKoreaKeywordService fmKoreaSearchKeywordService, FmKoreaScheduler scheduler) {
+    public FmKoreaController(FmKoreaKeywordService fmKoreaSearchKeywordService) {
         this.fmKoreaSearchKeywordService = fmKoreaSearchKeywordService;
-        this.scheduler = scheduler;
     }
 
     @GetMapping("/get")

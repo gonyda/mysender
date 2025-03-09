@@ -7,14 +7,20 @@ import org.apache.commons.lang3.StringUtils;
  */
 public enum FmKoreaStockEnum {
 
+    // 도메인
+    BASE_URL("https://www.fmkorea.com"),
+
     // 키워드 검색
-    PREV_URL("https://www.fmkorea.com/search.php?mid=stock&listStyle=list&search_keyword="),
-    NEXT_URL("&search_target=title_content&page=1"),
-    FIRST_CLASSNAME("bd_lst"),
+    FIRST_URL("https://www.fmkorea.com/search.php?mid=stock&listStyle=list&search_keyword="),
+    SECOND_URL("&search_target=title_content&page=1"),
 
     // 인기글
     POPULAR_URL("https://www.fmkorea.com/index.php?mid=stock&sort_index=pop&order_type=desc"),
-    POPULAR_CLASSNAME(".fm_best_widget");
+
+    // 본문
+    SELECTOR_CONTENT("div.rd_body div.xe_content"),
+    SELECTOR_POST_TIME("div.top_area span.date"),
+    SELECTOR_TITLE("h1.np_18px > span.np_18px_span");
 
     private final String value;
 
@@ -23,9 +29,9 @@ public enum FmKoreaStockEnum {
     }
 
     public static String getFullUrl(String keyword) {
-        return StringUtils.join(PREV_URL.getValue()
+        return StringUtils.join(FIRST_URL.getValue()
                                 , keyword
-                                , NEXT_URL.getValue());
+                                , SECOND_URL.getValue());
     }
 
     public String getValue() {

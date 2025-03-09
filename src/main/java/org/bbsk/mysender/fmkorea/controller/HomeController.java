@@ -25,7 +25,7 @@ public class HomeController {
     @GetMapping("/test")
     public String test() {
 
-        scheduler.getFmKoreaCrawlingByPopularToStock();
+        scheduler.getFmKoreaCrawlingBySearchKeywordToStock();
         return "Crawling Test";
     }
 }

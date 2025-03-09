@@ -62,7 +62,7 @@ public class FmKoreaCrawlingByPopularService {
         AtomicInteger workCnt = new AtomicInteger();
         return linkList.stream()
                 .map(link -> {
-                    mainPage.navigate("https://www.fmkorea.com" + link);
+                    mainPage.navigate(FmKoreaStockEnum.BASE_URL.getValue() + link);
                     ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingService.getContentCrawling(mainPage);
                     log.info("## 인기글 Crawled {} posts", workCnt.incrementAndGet());
                     return crawlingDto.getFmKoreaArticleDto();

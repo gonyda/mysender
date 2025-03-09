@@ -1,12 +1,12 @@
 package org.bbsk.mysender.fmkorea.dto;
 
 public class ContentCrawlingDto {
-    private final boolean isDuplicated;
+    private final boolean isOverByTime;
     private final FmKoreaArticleDto fmKoreaArticleDto;
     private final String nextPageUrl;
 
-    public boolean isDuplicated() {
-        return isDuplicated;
+    public boolean isOverByTime() {
+        return isOverByTime;
     }
 
     public FmKoreaArticleDto getFmKoreaArticleDto() {
@@ -18,7 +18,7 @@ public class ContentCrawlingDto {
     }
 
     private ContentCrawlingDto(Builder builder) {
-        this.isDuplicated = builder.isDuplicated;
+        this.isOverByTime = builder.isDuplicated;
         this.fmKoreaArticleDto = builder.fmKoreaArticleDto;
         this.nextPageUrl = builder.nextPageUrl;
     }
@@ -32,7 +32,7 @@ public class ContentCrawlingDto {
         private FmKoreaArticleDto fmKoreaArticleDto;
         private String nextPageUrl;
 
-        public Builder isDuplicated(boolean isDuplicated) {
+        public Builder isOverByTime(boolean isDuplicated) {
             this.isDuplicated = isDuplicated;
             return this;
         }

@@ -1,13 +1,12 @@
 package org.bbsk.mysender.fmkorea.service.keyword;
 
-import org.bbsk.mysender.crawler.SeleniumUtils;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Page;
+import org.bbsk.mysender.crawler.PlayWrightUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.bbsk.mysender.fmkorea.service.FmKoreaContentCrawlingService;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,13 +14,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class FmKoreaCrawlingByKeywordSearchService {
 
     private static final Logger log = LoggerFactory.getLogger(FmKoreaCrawlingByKeywordSearchService.class);
-
-    private static final String CSS_SELECTOR_BY_FIRST_POST = "td.title.hotdeal_var8 a:not(.replyNum)";
 
     private final FmKoreaContentCrawlingService fmKoreaContentCrawlingService;
 
@@ -34,40 +32,38 @@ public class FmKoreaCrawlingByKeywordSearchService {
      * 전체목록 - 글 본문 방문 (가장 최신글) - 다음글로 이동 (다음글 버튼)
      * 속도개선 (크롤링 횟수 줄이기)
      *
-     * @param chromeDriver
      * @param keyword
      * @param now
      * @param crawlingTime 시간
      * @return
      */
-    public List<FmKoreaArticleDto> getFmKoreaCrawlingBySearchKeywordToStock
-        (WebDriver chromeDriver, String keyword, LocalDateTime now, int crawlingTime) {
+    public List<FmKoreaArticleDto> getFmKoreaCrawlingBySearchKeywordToStock(String keyword, LocalDateTime now, int crawlingTime) {
         log.info("## Current Keyword: {}", keyword);
+        AtomicInteger workCnt = new AtomicInteger();
 
+        BrowserContext browserContext = PlayWrightUtils.getBrowser();
+        Page page = browserContext.newPage();
         // 첫번째 게시글 본문으로 이동
-        moveArticle(chromeDriver, keyword);
+        moveFirstArticle(page, keyword);
 
         // 본문 글 크롤링
-        int workCnt = 0;
         List<FmKoreaArticleDto> dtoList = new ArrayList<>();
         while (true) {
-            ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingService.getContentCrawling(chromeDriver, keyword, now, crawlingTime);
+            ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingService.getContentCrawling(page, keyword, now, crawlingTime);
 
             // 현재시간 기준 두시간 전 게시글 이면 크롤링 X (이미 이메일 발송 된 게시글)
-            if(crawlingDto.isDuplicated()) {
+            if(crawlingDto.isOverByTime()) {
                 break;
             }
 
             dtoList.add(crawlingDto.getFmKoreaArticleDto());
-            workCnt++;
-            log.info("## Crawled {} posts", workCnt);
+            log.info("## {} Crawled {} posts", keyword, workCnt.incrementAndGet());
 
             // 다음 글 이동
-            chromeDriver.get(crawlingDto.getNextPageUrl());
+            page.navigate(crawlingDto.getNextPageUrl());
         }
 
-        SeleniumUtils.close(chromeDriver);
-
+        PlayWrightUtils.close(browserContext, page);
         log.info("## End Crawling");
 
         return dtoList;
@@ -75,37 +71,26 @@ public class FmKoreaCrawlingByKeywordSearchService {
 
     /**
      * 게시글 본문으로 이동
-     * @param chromeDriver
+     * @param page
      * @param keyword
      */
-    private static void moveArticle(WebDriver chromeDriver, String keyword) {
-        // 첫번째 게시글 본문 링크 조회
-        // 해당 글 링크로 이동
-        chromeDriver.get(getFirstArticleLink(chromeDriver, keyword));
+    private static void moveFirstArticle(Page page, String keyword) {
+        // 첫번째 게시글 본문 이동
+        String firstArticleLink = getFirstArticleLink(page, keyword);
+        page.navigate(FmKoreaStockEnum.BASE_URL.getValue() + firstArticleLink);
     }
 
     /**
      * 키워드로 검색한 게시글 중 첫번째 게시글 링크 조회
-     * @param chromeDriver
+     * @param page
      * @param keyword
      * @return
      */
-    private static String getFirstArticleLink(WebDriver chromeDriver, String keyword) {
-        // 전체 게시글 목록 크롤링
-        // 게시글 목록 중 첫번째 글
-        WebElement firstPost = getParentElement(chromeDriver, keyword)
-                .findElement(By.cssSelector(CSS_SELECTOR_BY_FIRST_POST));
-        // 첫 번째 게시글의 링크 가져오기
-        return firstPost.getAttribute("href");
+    private static String getFirstArticleLink(Page page, String keyword) {
+        // 크롤링 URL 이동
+        page.navigate(FmKoreaStockEnum.getFullUrl(keyword));
+        // 첫 게시글 링크 조회
+        return page.waitForSelector("tbody > tr:not(.notice) td.title a.hx").getAttribute("href");
     }
 
-    /**
-     * 주식게시판 (키워드 검색)
-     * @param chromeDriver
-     * @param keyword
-     * @return
-     */
-    private static WebElement getParentElement(WebDriver chromeDriver, String keyword) {
-        return SeleniumUtils.getParentElement(FmKoreaStockEnum.getFullUrl(keyword), FmKoreaStockEnum.FIRST_CLASSNAME.getValue(), chromeDriver);
-    }
 }

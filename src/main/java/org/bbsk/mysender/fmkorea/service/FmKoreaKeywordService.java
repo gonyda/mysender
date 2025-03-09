@@ -8,7 +8,8 @@ import java.util.List;
 @Service
 public class FmKoreaKeywordService {
 
-    private static final List<String> KEYWORDLIST = new ArrayList<>();
+    private static final List<String> KEYWORDLIST = new ArrayList<>(List.of("테슬라"));
+    
 
     public List<String> getKeywordList() {
         return KEYWORDLIST;
