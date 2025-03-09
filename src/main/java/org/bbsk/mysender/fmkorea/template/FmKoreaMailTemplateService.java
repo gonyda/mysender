@@ -4,6 +4,8 @@ import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,10 +56,26 @@ public class FmKoreaMailTemplateService {
         if (text == null) {
             return "";
         }
+        text = setVideo(text);
         text = setImgTag(text);
         text = setIframeTag(text);
 
         return text;
+    }
+
+    private static String setVideo(String text) {
+        // HTML 파싱
+        Document doc = Jsoup.parse(text);
+
+        // 클래스가 auto_media_wrapper인 태그 선택 후 대체
+        Elements elems = doc.select(".auto_media_wrapper");
+        for (Element elem : elems) {
+            // 새로운 div 요소를 생성
+            elem.replaceWith(new Element("div").appendText("Video 삭제 처리 되었습니다."));
+        }
+
+        // 변경된 HTML 리턴
+        return doc.html();
     }
 
     private static String setIframeTag(String text) {
