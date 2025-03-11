@@ -5,7 +5,7 @@ import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
 import org.bbsk.mysender.fmkorea.service.keyword.FmKoreaCrawlingByKeywordSearchService;
 import org.bbsk.mysender.fmkorea.service.popular.FmKoreaCrawlingByPopularService;
 import org.bbsk.mysender.fmkorea.service.FmKoreaKeywordService;
-import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateService;
+import org.bbsk.mysender.fmkorea.template.FmKoreaMailTemplateV2Service;
 import org.bbsk.mysender.gmail.constant.GmailEnum;
 import org.bbsk.mysender.gmail.service.GmailService;
 import org.slf4j.Logger;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @EnableScheduling
@@ -28,18 +29,18 @@ public class FmKoreaScheduler {
     private final FmKoreaCrawlingByPopularService fmKoreaCrawlingByPopularService;
     private final GmailService gmailService;
     private final FmKoreaKeywordService fmKoreaKeywordService;
-    private final FmKoreaMailTemplateService fmKoreaMailTemplateService;
+    private final FmKoreaMailTemplateV2Service fmKoreaMailTemplateV2Service;
 
     public FmKoreaScheduler(FmKoreaCrawlingByKeywordSearchService fmKoreaCrawlingByKeywordSearchService
             , FmKoreaCrawlingByPopularService fmKoreaCrawlingByPopularService
             , GmailService gmailService
             , FmKoreaKeywordService fmKoreaKeywordService
-            , FmKoreaMailTemplateService fmKoreaMailTemplateService) {
+            , FmKoreaMailTemplateV2Service fmKoreaMailTemplateV2Service) {
         this.fmKoreaCrawlingByKeywordSearchService = fmKoreaCrawlingByKeywordSearchService;
         this.fmKoreaCrawlingByPopularService = fmKoreaCrawlingByPopularService;
         this.gmailService = gmailService;
         this.fmKoreaKeywordService = fmKoreaKeywordService;
-        this.fmKoreaMailTemplateService = fmKoreaMailTemplateService;
+        this.fmKoreaMailTemplateV2Service = fmKoreaMailTemplateV2Service;
     }
 
     /**
@@ -72,12 +73,9 @@ public class FmKoreaScheduler {
     public void getFmKoreaCrawlingByPopularToStock() {
         log.info("## Popular Start");
 
-        List<FmKoreaArticleDto> crawledArticles =
-                fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(LocalTime.now(), 180L);
-
-        if (!crawledArticles.isEmpty()) {
-            sendEmail(crawledArticles);
-        }
+        Optional.of(fmKoreaCrawlingByPopularService.getFmKoreaCrawlingByPopularToStock(LocalTime.now(), 180L))
+                .filter(list -> !list.isEmpty())
+                .ifPresent(this::sendEmail);
 
         log.info("## Popular End");
     }
@@ -86,7 +84,7 @@ public class FmKoreaScheduler {
         gmailService.sendEmail(
                 GmailEnum.TO.getValue()
                 , GmailEnum.TITLE.formatTitle(crawledArticles.get(0).getKeyword(), crawledArticles.size())
-                , fmKoreaMailTemplateService.getHtmlForSendMail(crawledArticles)
+                , fmKoreaMailTemplateV2Service.getHtmlForMail(crawledArticles)
         );
 
         log.info("## Send Email: {}", crawledArticles.get(0).getKeyword());
