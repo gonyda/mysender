@@ -24,6 +24,6 @@ public class FmKoreaCommonContentCrawlingService {
     }
 
     public String getNextPageUrl(Page page) {
-        return page.waitForSelector(".prev_next_btns .next a").getAttribute("href");
+        return page.waitForSelector(FmKoreaStockEnum.SELECTOR_NEXT_ARTICLE_BTN.getValue()).getAttribute("href");
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.time.Duration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,6 +56,47 @@ public class FmKoreaCrawlingByPopularService {
     }
 
     /**
+     * 크롤링 대상
+     *
+     * @param now
+     * @param crawlingTime
+     * @param mainPage
+     * @return
+     */
+    private static List<String> getArticleLinkList(LocalTime now, long crawlingTime, Page mainPage) {
+        // 페이지 번호
+        AtomicInteger pageNo = new AtomicInteger();
+        List<String> linkList = new ArrayList<>();
+
+        while (true) {
+            // 크롤링 URL 이동
+            mainPage.navigate(FmKoreaStockEnum.POPULAR_URL.getValue() + pageNo.incrementAndGet());
+
+            // 대상 요소가 로드될 때까지 대기
+            mainPage.waitForSelector(SELECTOR_ARTICLE_LIST);
+
+            // li 태그들을 모두 선택하여 링크와 작성시간 추출
+            List<ElementHandle> articleList = mainPage.querySelectorAll(SELECTOR_ARTICLE_LIST);
+
+            // 크롤링 시간 범위 내의 게시글 링크 조회
+            List<String> validLinks = articleList.stream()
+                    .takeWhile(li -> !isOverByCrawlingTime(crawlingTime, now, getPostingTime(li)))
+                    .map(FmKoreaCrawlingByPopularService::getLink)
+                    .toList();
+
+            linkList.addAll(validLinks);
+
+            // 만약 페이지 내 모든 게시글이 크롤링 시간 범위 내의 게시글이라면 다음 페이지로 이동
+            if (validLinks.size() < articleList.size()) {
+                break;
+            }
+        }
+
+        log.info("## 인기글 Target Page Size: {}", linkList.size());
+        return linkList;
+    }
+
+    /**
      * 본문 크롤링 데이터
      *
      * @param linkList
@@ -70,31 +112,6 @@ public class FmKoreaCrawlingByPopularService {
                     log.info("## 인기글 Crawled {} posts", workCnt.incrementAndGet());
                     return crawlingDto.getFmKoreaArticleDto();
                 }).toList();
-    }
-
-    /**
-     * 크롤링 대상
-     *
-     * @param now
-     * @param crawlingTime
-     * @param mainPage
-     * @return
-     */
-    private static List<String> getArticleLinkList(LocalTime now, long crawlingTime, Page mainPage) {
-        // 크롤링 URL 이동
-        mainPage.navigate(FmKoreaStockEnum.POPULAR_URL.getValue());
-
-        // 대상 요소가 로드될 때까지 대기
-        mainPage.waitForSelector(SELECTOR_ARTICLE_LIST);
-
-        // li 태그들을 모두 선택하여 링크와 작성시간 추출
-        List<String> linkList = mainPage.querySelectorAll(SELECTOR_ARTICLE_LIST)
-                .stream()
-                .takeWhile(li -> !isOverByCrawlingTime(crawlingTime, now, getPostingTime(li)))
-                .map(FmKoreaCrawlingByPopularService::getLink).toList();
-
-        log.info("## 인기글 Target Page Size: {}", linkList.size());
-        return linkList;
     }
 
     /**
