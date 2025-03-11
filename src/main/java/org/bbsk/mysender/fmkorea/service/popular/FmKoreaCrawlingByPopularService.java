@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.time.Duration;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -123,8 +124,13 @@ public class FmKoreaCrawlingByPopularService {
      */
     private static boolean isOverByCrawlingTime(long crawlingTime, LocalTime now, String postingTime) {
         // 현재시간 기준 세시간 전 게시글인지
-        return Duration.between(LocalTime.parse(postingTime), now)
-                .toMinutes() > crawlingTime;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalTime postTime = LocalTime.parse(postingTime, formatter);
+        long minutes = Duration.between(postTime, now).toMinutes();
+        if (minutes < 0) {
+            minutes += 24 * 60; // 하루(1440분)를 추가하여 전날 게시글을 고려
+        }
+        return minutes > crawlingTime;
     }
 
     /**
