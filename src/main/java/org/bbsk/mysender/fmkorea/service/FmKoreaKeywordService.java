@@ -28,4 +28,9 @@ public class FmKoreaKeywordService {
 
         return KEYWORDLIST;
     }
+
+    public List<String> removeAll() {
+        KEYWORDLIST.clear();
+        return KEYWORDLIST;
+    }
 }

@@ -32,5 +32,8 @@ public class FmKoreaController {
         return StringUtils.join(fmKoreaSearchKeywordService.removeKeyword(keyword), ", ");
     }
 
-
+    @GetMapping("/removeAll")
+    public String removeAll() {
+        return StringUtils.join(fmKoreaSearchKeywordService.removeAll(), ", ");
+    }
 }

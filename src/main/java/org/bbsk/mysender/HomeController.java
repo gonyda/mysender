@@ -1,10 +1,10 @@
-package org.bbsk.mysender.fmkorea.controller;
+package org.bbsk.mysender;
 
 import org.bbsk.mysender.fmkorea.scheduler.FmKoreaScheduler;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class HomeController {
 
     private final FmKoreaScheduler scheduler;
@@ -15,13 +15,11 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "WELCOME my-sender!";
+        return "index";
     }
 
     @GetMapping("/test")
-    public String test() {
-
+    public void test() {
         scheduler.getFmKoreaCrawlingByPopularToStock();
-        return "Crawling Test";
     }
 }
