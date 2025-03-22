@@ -55,6 +55,10 @@ logging.level:
     springframework:
       cache: TRACE;
 
+# alpha-vantage
+alpha-vantage:
+  key: ${AV_KEY}
+
 ---
 
 # prod
@@ -114,3 +118,7 @@ logging.level:
   org:
     springframework:
       cache: TRACE;
+
+# alpha-vantage
+alpha-vantage:
+  key: ${AV_KEY}
