@@ -10,6 +10,9 @@ import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.bbsk.mysender.api.alphavantage.dto.StockDataResponseDto.*;
 
 @Service
 public class AlphaVantageStockService {
@@ -64,13 +67,23 @@ public class AlphaVantageStockService {
     }
 
     /**
-     * 당일 종가 구하기
+     * 당일(마지막) 종가 구하기
      * @param stockData
      * @param today
      * @return
      */
     public double getTodayPrice(StockDataResponseDto stockData, String today) {
-        return Double.parseDouble(stockData.getTimeSeriesDaily().get(today).getClose());
+        DailyPrice dailyPrice = stockData.getTimeSeriesDaily().get(today);
+        AtomicLong offset = new AtomicLong(1);
+
+        // 주어진 날짜에 데이터가 없으면 이전 날짜로 이동
+        while (dailyPrice == null) {
+            today = LocalDate.now().minusDays(offset.incrementAndGet())
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            dailyPrice = stockData.getTimeSeriesDaily().get(today);
+        }
+
+        return Double.parseDouble(dailyPrice.getClose());
     }
 
     /**

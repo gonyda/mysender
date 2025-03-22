@@ -20,6 +20,26 @@ public class StockDto {
         this.percentageByDaysBefore100 = percentageByDaysBefore100;
     }
 
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public double getPercentageByYesterday() {
+        return percentageByYesterday;
+    }
+
+    public double getPercentageByDaysBefore10() {
+        return percentageByDaysBefore10;
+    }
+
+    public double getPercentageByDaysBefore20() {
+        return percentageByDaysBefore20;
+    }
+
+    public double getPercentageByDaysBefore100() {
+        return percentageByDaysBefore100;
+    }
+
     @Override
     public String toString() {
         return "HtmlDto{" +
