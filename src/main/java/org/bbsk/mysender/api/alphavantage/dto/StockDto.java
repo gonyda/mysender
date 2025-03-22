@@ -1,44 +1,7 @@
 package org.bbsk.mysender.api.alphavantage.dto;
 
-public class StockDto {
-
-    private final String symbol;
-    private final double percentageByYesterday;
-    private final double percentageByDaysBefore10;
-    private final double percentageByDaysBefore20;
-    private final double percentageByDaysBefore100;
-
-    public StockDto(String symbol
-            , double percentageByYesterday
-            , double percentageByDaysBefore10
-            , double percentageByDaysBefore20
-            , double percentageByDaysBefore100) {
-        this.symbol = symbol;
-        this.percentageByYesterday = percentageByYesterday;
-        this.percentageByDaysBefore10 = percentageByDaysBefore10;
-        this.percentageByDaysBefore20 = percentageByDaysBefore20;
-        this.percentageByDaysBefore100 = percentageByDaysBefore100;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public double getPercentageByYesterday() {
-        return percentageByYesterday;
-    }
-
-    public double getPercentageByDaysBefore10() {
-        return percentageByDaysBefore10;
-    }
-
-    public double getPercentageByDaysBefore20() {
-        return percentageByDaysBefore20;
-    }
-
-    public double getPercentageByDaysBefore100() {
-        return percentageByDaysBefore100;
-    }
+public record StockDto(String symbol, double percentageByYesterday, double percentageByDaysBefore10,
+                       double percentageByDaysBefore20, double percentageByDaysBefore100) {
 
     @Override
     public String toString() {

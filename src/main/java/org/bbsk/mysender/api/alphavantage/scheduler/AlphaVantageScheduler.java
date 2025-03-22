@@ -34,7 +34,7 @@ public class AlphaVantageScheduler {
             double todayPrice = alphaVantageStockService.getTodayPrice(stockData, today);
 
             // 전일 대비 변동률
-            double percentageByYesterday = alphaVantageStockService.getPercentageByYesterday(stockData, todayPrice);
+            double percentageByYesterday = alphaVantageStockService.getPercentageByYesterday(stockData, todayPrice, today);
             // 10일 평균값 구하기
             double percentageByDaysBefore10 = alphaVantageStockService.getPercentageByDaysBefore(stockData, todayPrice, 10 );
             // 20일 평균값 구하기

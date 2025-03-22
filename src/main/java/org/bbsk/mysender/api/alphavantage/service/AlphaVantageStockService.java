@@ -1,7 +1,6 @@
 package org.bbsk.mysender.api.alphavantage.service;
 
 import org.bbsk.mysender.api.alphavantage.constant.AlphaVantageRecord;
-import org.bbsk.mysender.api.alphavantage.dto.StaticStockDto;
 import org.bbsk.mysender.api.alphavantage.dto.StockDataResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +37,16 @@ public class AlphaVantageStockService {
 
     /**
      * 전일 대비 변동률
+     *
      * @param stockData
      * @param todayPrice
+     * @param today
      * @return
      */
-    public double getPercentageByYesterday(StockDataResponseDto stockData, double todayPrice) {
-        String yesterday = LocalDate.now().minusDays(2L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    public double getPercentageByYesterday(StockDataResponseDto stockData, double todayPrice, String today) {
+        String yesterday = LocalDate.parse(today, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                     .minusDays(1)
+                                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         double yesterdayPrice = Double.parseDouble(stockData.getTimeSeriesDaily().get(yesterday).getClose());
         // 전일대비
         return getPercentage(todayPrice, yesterdayPrice);
