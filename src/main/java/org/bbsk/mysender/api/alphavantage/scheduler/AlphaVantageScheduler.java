@@ -44,8 +44,6 @@ public class AlphaVantageScheduler {
                             percentageByDaysBefore20,
                             percentageByDaysBefore100)
             );
-
-            break;
         }
     }
 
