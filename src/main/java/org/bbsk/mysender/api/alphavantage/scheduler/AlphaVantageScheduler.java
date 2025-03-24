@@ -4,6 +4,8 @@ import org.bbsk.mysender.api.alphavantage.dto.StaticStockDto;
 import org.bbsk.mysender.api.alphavantage.dto.StockDto;
 import org.bbsk.mysender.api.alphavantage.dto.StockDataResponseDto;
 import org.bbsk.mysender.api.alphavantage.service.AlphaVantageStockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
 @EnableScheduling
 public class AlphaVantageScheduler {
 
+
+    private static final Logger log = LoggerFactory.getLogger(AlphaVantageScheduler.class);
     private final AlphaVantageStockService alphaVantageStockService;
 
     public AlphaVantageScheduler(AlphaVantageStockService alphaVantageStockService) {
@@ -23,7 +27,9 @@ public class AlphaVantageScheduler {
         // 기존 데이터 초기화
         StaticStockDto.STATIC_STOCK_DTO_LIST.clear();
         // 주가 데이터 조회
+        log.info("## Get Stock Data Start");
         for (String symbol : StaticStockDto.SYMBOL_LIST) {
+            log.info("## Symbol: {}", symbol);
             StockDataResponseDto stockData = alphaVantageStockService.getStockData(symbol);
             // 당일 종가
             double todayPrice = alphaVantageStockService.getTodayPrice(stockData);
@@ -45,6 +51,8 @@ public class AlphaVantageScheduler {
                             percentageByDaysBefore100)
             );
         }
+
+        log.info("## Get Stock Data End");
     }
 
 
