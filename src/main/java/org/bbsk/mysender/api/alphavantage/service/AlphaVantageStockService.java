@@ -2,25 +2,18 @@ package org.bbsk.mysender.api.alphavantage.service;
 
 import org.bbsk.mysender.api.alphavantage.constant.AlphaVantageRecord;
 import org.bbsk.mysender.api.alphavantage.dto.StockDataResponseDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static org.bbsk.mysender.api.alphavantage.dto.StockDataResponseDto.*;
+import java.util.List;
 
 @Service
 public class AlphaVantageStockService {
 
-    private static final Logger log = LoggerFactory.getLogger(AlphaVantageStockService.class);
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final RestClient restClient = RestClient.create();
 
     private final AlphaVantageRecord alphaVantageRecord;
-
-    private final RestClient restClient = RestClient.create();
 
     public AlphaVantageStockService(AlphaVantageRecord alphaVantageRecord) {
         this.alphaVantageRecord = alphaVantageRecord;
@@ -36,20 +29,36 @@ public class AlphaVantageStockService {
     }
 
     /**
-     * 전일 대비 변동률
-     *
+     * 당일(마지막) 종가 구하기
      * @param stockData
-     * @param todayPrice
-     * @param today
      * @return
      */
-    public double getPercentageByYesterday(StockDataResponseDto stockData, double todayPrice, String today) {
-        String yesterday = LocalDate.parse(today, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                                     .minusDays(1)
-                                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        double yesterdayPrice = Double.parseDouble(stockData.getTimeSeriesDaily().get(yesterday).getClose());
+    public double getTodayPrice(StockDataResponseDto stockData) {
+        return stockData.getTimeSeriesDaily().keySet().stream()
+                .limit(1)
+                .map(today -> Double.parseDouble(stockData.getTimeSeriesDaily().get(today).getClose()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("## Time series data is empty."));
+    }
+
+    /**
+     * 전일(마지막 하루 전 날) 대비 변동률
+     *
+     * @param stockData
+     * @return
+     */
+    public double getPercentageByYesterday(StockDataResponseDto stockData) {
+        List<Double> todayPriceAndYesterdayPrice = stockData.getTimeSeriesDaily().keySet().stream()
+                .limit(2)
+                .map(date -> Double.parseDouble(stockData.getTimeSeriesDaily().get(date).getClose()))
+                .toList();
+
+        if(todayPriceAndYesterdayPrice.size() != 2) {
+            throw new IllegalStateException("## Time series data size is less than 2");
+        }
+
         // 전일대비
-        return getPercentage(todayPrice, yesterdayPrice);
+        return getPercentage(todayPriceAndYesterdayPrice.get(0), todayPriceAndYesterdayPrice.get(1));
     }
 
     /**
@@ -67,36 +76,6 @@ public class AlphaVantageStockService {
                 .sum() / daysAgo;
 
         return getPercentage(todayPrice, avgPrice);
-    }
-
-    /**
-     * 당일(마지막) 종가 구하기
-     * @param stockData
-     * @param today
-     * @return
-     */
-    public double getTodayPrice(StockDataResponseDto stockData, String today) {
-        DailyPrice dailyPrice = stockData.getTimeSeriesDaily().get(today);
-        AtomicLong offset = new AtomicLong(1);
-
-        // 주어진 날짜에 데이터가 없으면 이전 날짜로 이동
-        while (dailyPrice == null) {
-            today = LocalDate.now().minusDays(offset.incrementAndGet())
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            dailyPrice = stockData.getTimeSeriesDaily().get(today);
-        }
-
-        return Double.parseDouble(dailyPrice.getClose());
-    }
-
-    /**
-     * 오늘 일자 구하기
-     * @return
-     */
-    public String getToday() {
-        // 미국장은 한국시간 기준 전날에 개장
-        // 메일 발송시간이 매일 아침 07시 이므로 day -1
-        return LocalDate.now().minusDays(1L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     /**

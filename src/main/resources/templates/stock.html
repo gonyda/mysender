@@ -72,10 +72,11 @@
                 white-space: nowrap;
                 font-weight: bold;
             }
-            td:nth-of-type(2):before { content: "전일"; }
-            td:nth-of-type(3):before { content: "10일"; }
-            td:nth-of-type(4):before { content: "20일"; }
-            td:nth-of-type(5):before { content: "100일"; }
+            td:nth-of-type(2):before { content: "종가"; }
+            td:nth-of-type(3):before { content: "전일"; }
+            td:nth-of-type(4):before { content: "10일"; }
+            td:nth-of-type(5):before { content: "20일"; }
+            td:nth-of-type(6):before { content: "100일"; }
         }
     </style>
 </head>
@@ -86,6 +87,7 @@
         <thead>
         <tr>
             <th></th>
+            <th>Today Price</th>
             <th>% Yesterday</th>
             <th>% Days Before 10</th>
             <th>% Days Before 20</th>
@@ -108,31 +110,31 @@
 
     // 샘플 데이터 (실제 환경에서는 REST API 호출로 데이터를 가져올 수 있습니다)
     const sampleData = [
-        { symbol:'SPY', percentageByYesterday: -1.08, percentageByDaysBefore10: -0.69, percentageByDaysBefore20: -3.26, percentageByDaysBefore100: -5.28 },
-        { symbol:'QQQ', percentageByYesterday: -1.7, percentageByDaysBefore10: -1.31, percentageByDaysBefore20: -4.71, percentageByDaysBefore100: -7.29 },
-        { symbol:'TLT', percentageByYesterday: 0.1, percentageByDaysBefore10: 0.27, percentageByDaysBefore20: 0.12, percentageByDaysBefore100: 0.84 },
-        { symbol:'AAPL', percentageByYesterday: -0.61, percentageByDaysBefore10: -4.42, percentageByDaysBefore20: -8.5, percentageByDaysBefore100: -9.75 },
-        { symbol:'MSFT', percentageByYesterday: -1.33, percentageByDaysBefore10: -1.02, percentageByDaysBefore20: -2.68, percentageByDaysBefore100: -8.65 },
-        { symbol:'GOOGL', percentageByYesterday: -2.2, percentageByDaysBefore10: -3.76, percentageByDaysBefore20: -6.12, percentageByDaysBefore100: -11.47 },
-        { symbol:'AMZN', percentageByYesterday: -1.49, percentageByDaysBefore10: -2.55, percentageByDaysBefore20: -6.27, percentageByDaysBefore100: -10.49 },
-        { symbol:'META', percentageByYesterday: -3.73, percentageByDaysBefore10: -4.82, percentageByDaysBefore20: -9.16, percentageByDaysBefore100: -6.29 },
-        { symbol:'NVDA', percentageByYesterday: -3.43, percentageByDaysBefore10: 0.88, percentageByDaysBefore20: -4.66, percentageByDaysBefore100: -13.96 },
-        { symbol:'TSLA', percentageByYesterday: -5.34, percentageByDaysBefore10: -8.41, percentageByDaysBefore20: -19.08, percentageByDaysBefore100: -35.13 },
-        { symbol:'PLTR', percentageByYesterday: -3.96, percentageByDaysBefore10: 0.99, percentageByDaysBefore20: -4.44, percentageByDaysBefore100: 10.86 },
-        { symbol:'UBER', percentageByYesterday: -1.62, percentageByDaysBefore10: -1.71, percentageByDaysBefore20: -4.37, percentageByDaysBefore100: 1.55 },
-        { symbol:'TEM', percentageByYesterday: -8.28, percentageByDaysBefore10: -3.14, percentageByDaysBefore20: -17.5, percentageByDaysBefore100: -11.98 },
-        { symbol:'RXRX', percentageByYesterday: -6.58, percentageByDaysBefore10: 0.96, percentageByDaysBefore20: -13.36, percentageByDaysBefore100: -10.6 },
-        { symbol:'PEP', percentageByYesterday: -1.55, percentageByDaysBefore10: -1.78, percentageByDaysBefore20: -2.07, percentageByDaysBefore100: -3.87 },
-        { symbol:'KO', percentageByYesterday: -1.06, percentageByDaysBefore10: -1.26, percentageByDaysBefore20: -1.7, percentageByDaysBefore100: 6.65 },
-        { symbol:'O', percentageByYesterday: -0.04, percentageByDaysBefore10: -0.42, percentageByDaysBefore20: -0.05, percentageByDaysBefore100: 1.71 },
-        { symbol:'JPM', percentageByYesterday: 0.44, percentageByDaysBefore10: -0.27, percentageByDaysBefore20: -5.61, percentageByDaysBefore100: -5.08 },
-        { symbol:'BAC', percentageByYesterday: 0.51, percentageByDaysBefore10: 2.05, percentageByDaysBefore20: -2.58, percentageByDaysBefore100: -7.33 },
-        { symbol:'MS', percentageByYesterday: 0.13, percentageByDaysBefore10: 1.54, percentageByDaysBefore20: -4.51, percentageByDaysBefore100: -8.18 },
-        { symbol:'BLK', percentageByYesterday: 0.06, percentageByDaysBefore10: 2.46, percentageByDaysBefore20: 0.85, percentageByDaysBefore100: -4.64 },
-        { symbol:'BRK.B', percentageByYesterday: 0.02, percentageByDaysBefore10: 3.67, percentageByDaysBefore20: 4.57, percentageByDaysBefore100: 11.14 },
-        { symbol:'AXP', percentageByYesterday: -0.63, percentageByDaysBefore10: -1.22, percentageByDaysBefore20: -6.64, percentageByDaysBefore100: -11.11 },
-        { symbol:'V', percentageByYesterday: 0.07, percentageByDaysBefore10: -0.91, percentageByDaysBefore20: -3.21, percentageByDaysBefore100: 3.8 },
-        { symbol:'MA', percentageByYesterday: -0.34, percentageByDaysBefore10: -0.94, percentageByDaysBefore20: -3.57, percentageByDaysBefore100: -0.63 }
+        { symbol:'SPY', todayPrice: 213.22, percentageByYesterday: -1.08, percentageByDaysBefore10: -0.69, percentageByDaysBefore20: -3.26, percentageByDaysBefore100: -5.28 },
+        { symbol:'QQQ', todayPrice: 213.22, percentageByYesterday: -1.7, percentageByDaysBefore10: -1.31, percentageByDaysBefore20: -4.71, percentageByDaysBefore100: -7.29 },
+        { symbol:'TLT', todayPrice: 213.22, percentageByYesterday: 0.1, percentageByDaysBefore10: 0.27, percentageByDaysBefore20: 0.12, percentageByDaysBefore100: 0.84 },
+        { symbol:'AAPL', todayPrice: 213.22, percentageByYesterday: -0.61, percentageByDaysBefore10: -4.42, percentageByDaysBefore20: -8.5, percentageByDaysBefore100: -9.75 },
+        { symbol:'MSFT', todayPrice: 213.22, percentageByYesterday: -1.33, percentageByDaysBefore10: -1.02, percentageByDaysBefore20: -2.68, percentageByDaysBefore100: -8.65 },
+        { symbol:'GOOGL', todayPrice: 213.22, percentageByYesterday: -2.2, percentageByDaysBefore10: -3.76, percentageByDaysBefore20: -6.12, percentageByDaysBefore100: -11.47 },
+        { symbol:'AMZN', todayPrice: 213.22, percentageByYesterday: -1.49, percentageByDaysBefore10: -2.55, percentageByDaysBefore20: -6.27, percentageByDaysBefore100: -10.49 },
+        { symbol:'META', todayPrice: 213.22, percentageByYesterday: -3.73, percentageByDaysBefore10: -4.82, percentageByDaysBefore20: -9.16, percentageByDaysBefore100: -6.29 },
+        { symbol:'NVDA', todayPrice: 213.22, percentageByYesterday: -3.43, percentageByDaysBefore10: 0.88, percentageByDaysBefore20: -4.66, percentageByDaysBefore100: -13.96 },
+        { symbol:'TSLA', todayPrice: 213.22, percentageByYesterday: -5.34, percentageByDaysBefore10: -8.41, percentageByDaysBefore20: -19.08, percentageByDaysBefore100: -35.13 },
+        { symbol:'PLTR', todayPrice: 213.22, percentageByYesterday: -3.96, percentageByDaysBefore10: 0.99, percentageByDaysBefore20: -4.44, percentageByDaysBefore100: 10.86 },
+        { symbol:'UBER', todayPrice: 213.22, percentageByYesterday: -1.62, percentageByDaysBefore10: -1.71, percentageByDaysBefore20: -4.37, percentageByDaysBefore100: 1.55 },
+        { symbol:'TEM', todayPrice: 213.22, percentageByYesterday: -8.28, percentageByDaysBefore10: -3.14, percentageByDaysBefore20: -17.5, percentageByDaysBefore100: -11.98 },
+        { symbol:'RXRX', todayPrice: 213.22, percentageByYesterday: -6.58, percentageByDaysBefore10: 0.96, percentageByDaysBefore20: -13.36, percentageByDaysBefore100: -10.6 },
+        { symbol:'PEP', todayPrice: 213.22, percentageByYesterday: -1.55, percentageByDaysBefore10: -1.78, percentageByDaysBefore20: -2.07, percentageByDaysBefore100: -3.87 },
+        { symbol:'KO', todayPrice: 213.22, percentageByYesterday: -1.06, percentageByDaysBefore10: -1.26, percentageByDaysBefore20: -1.7, percentageByDaysBefore100: 6.65 },
+        { symbol:'O', todayPrice: 213.22, percentageByYesterday: -0.04, percentageByDaysBefore10: -0.42, percentageByDaysBefore20: -0.05, percentageByDaysBefore100: 1.71 },
+        { symbol:'JPM', todayPrice: 213.22, percentageByYesterday: 0.44, percentageByDaysBefore10: -0.27, percentageByDaysBefore20: -5.61, percentageByDaysBefore100: -5.08 },
+        { symbol:'BAC', todayPrice: 213.22, percentageByYesterday: 0.51, percentageByDaysBefore10: 2.05, percentageByDaysBefore20: -2.58, percentageByDaysBefore100: -7.33 },
+        { symbol:'MS', todayPrice: 213.22, percentageByYesterday: 0.13, percentageByDaysBefore10: 1.54, percentageByDaysBefore20: -4.51, percentageByDaysBefore100: -8.18 },
+        { symbol:'BLK', todayPrice: 213.22, percentageByYesterday: 0.06, percentageByDaysBefore10: 2.46, percentageByDaysBefore20: 0.85, percentageByDaysBefore100: -4.64 },
+        { symbol:'BRK.B', todayPrice: 213.22, percentageByYesterday: 0.02, percentageByDaysBefore10: 3.67, percentageByDaysBefore20: 4.57, percentageByDaysBefore100: 11.14 },
+        { symbol:'AXP', todayPrice: 213.22, percentageByYesterday: -0.63, percentageByDaysBefore10: -1.22, percentageByDaysBefore20: -6.64, percentageByDaysBefore100: -11.11 },
+        { symbol:'V', todayPrice: 213.22, percentageByYesterday: 0.07, percentageByDaysBefore10: -0.91, percentageByDaysBefore20: -3.21, percentageByDaysBefore100: 3.8 },
+        { symbol:'MA', todayPrice: 213.22, percentageByYesterday: -0.34, percentageByDaysBefore10: -0.94, percentageByDaysBefore20: -3.57, percentageByDaysBefore100: -0.63 }
     ];
 
     function renderTable(data) {
@@ -142,6 +144,7 @@
             const row = document.createElement('tr');
             row.innerHTML = `
           <td style="font-weight: bold; background-color: #f4f4f4">${dto.symbol}</td>
+          <td style="font-weight: bold">${dto.todayPrice}</td>
           <td style="color: ${getColor(dto.percentageByYesterday)};">${dto.percentageByYesterday}%</td>
           <td style="color: ${getColor(dto.percentageByDaysBefore10)};">${dto.percentageByDaysBefore10}%</td>
           <td style="color: ${getColor(dto.percentageByDaysBefore20)};">${dto.percentageByDaysBefore20}%</td>
