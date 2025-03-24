@@ -4,8 +4,6 @@ import org.bbsk.mysender.api.alphavantage.dto.StaticStockDto;
 import org.bbsk.mysender.api.alphavantage.dto.StockDto;
 import org.bbsk.mysender.api.alphavantage.dto.StockDataResponseDto;
 import org.bbsk.mysender.api.alphavantage.service.AlphaVantageStockService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,8 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 @EnableScheduling
 public class AlphaVantageScheduler {
-
-    private static final Logger log = LoggerFactory.getLogger(AlphaVantageScheduler.class);
 
     private final AlphaVantageStockService alphaVantageStockService;
 

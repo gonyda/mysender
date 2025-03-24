@@ -70,9 +70,7 @@ public class AlphaVantageStockService {
     public double getPercentageByDaysBefore(StockDataResponseDto stockData, double todayPrice, int daysAgo) {
         double avgPrice = stockData.getTimeSeriesDaily().keySet().stream()
                 .limit(daysAgo)
-                .mapToDouble(date -> {
-                    return Double.parseDouble(stockData.getTimeSeriesDaily().get(date).getClose());
-                })
+                .mapToDouble(date -> Double.parseDouble(stockData.getTimeSeriesDaily().get(date).getClose()))
                 .sum() / daysAgo;
 
         return getPercentage(todayPrice, avgPrice);
