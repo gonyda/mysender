@@ -6,4 +6,5 @@ public record StockDto(String symbol,
                        double percentageByDaysBefore10,
                        double percentageByDaysBefore20,
                        double percentageByDaysBefore60,
-                       double percentageByDaysBefore100) {}
+                       double percentageByDaysBefore100,
+                       double percentageVolumeBy10Days) {}

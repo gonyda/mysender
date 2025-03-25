@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>주식 성과 데이터</title>
     <style>
         /* 기본 리셋 */
@@ -29,120 +29,161 @@
             margin-bottom: 20px;
             color: #333;
         }
-        table {
+        /* 데스크탑 테이블 스타일 */
+        .desktop-view table {
             width: 100%;
             border-collapse: collapse;
         }
-        table thead tr {
+        .desktop-view table thead tr {
             background: #007BFF;
             color: #fff;
         }
-        table th, table td {
+        .desktop-view table th,
+        .desktop-view table td {
             padding: 10px;
             border: 1px solid #ddd;
             text-align: center;
         }
-        table tbody tr:nth-child(even) {
+        .desktop-view table tbody tr:nth-child(even) {
             background: #f9f9f9;
         }
-        /* 모바일 반응형 */
+
+        /* 모바일 카드 레이아웃 스타일 */
+        .mobile-view {
+            display: none;
+        }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .card h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .card p {
+            margin: 5px 0;
+        }
+
+        /* 반응형: 모바일일 때 데스크탑 뷰 숨기고 모바일 카드 뷰 보여주기 */
         @media (max-width: 600px) {
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            tr {
-                margin-bottom: 1rem;
-            }
-            td {
-                border: none;
-                position: relative;
-                padding-left: 50%;
-                text-align: left;
-            }
-            td:before {
-                position: absolute;
-                left: 10px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                font-weight: bold;
-            }
-            td:nth-of-type(2):before { content: "종가"; }
-            td:nth-of-type(3):before { content: "전일"; }
-            td:nth-of-type(4):before { content: "10일"; }
-            td:nth-of-type(5):before { content: "20일"; }
-            td:nth-of-type(6):before { content: "60일"; }
-            td:nth-of-type(7):before { content: "100일"; }
+            .desktop-view { display: none; }
+            .mobile-view { display: block; }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>주식 성과 데이터</h1>
-    <table>
-        <thead>
-        <tr>
-            <th></th>
-            <th>Today Price</th>
-            <th>% Yesterday</th>
-            <th>% Days Before 10</th>
-            <th>% Days Before 20</th>
-            <th>% Days Before 60</th>
-            <th>% Days Before 100</th>
-        </tr>
-        </thead>
-        <tbody id="dataTable">
-        <!-- 데이터 행이 여기 추가됩니다. -->
-        </tbody>
-    </table>
+    <!-- 데스크탑 테이블 뷰 -->
+    <div class="desktop-view">
+        <table>
+            <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Today Price</th>
+                <th>% Yesterday</th>
+                <th>% 10일 전</th>
+                <th>% 20일 전</th>
+                <th>% 60일 전</th>
+                <th>% 100일 전</th>
+                <th>% 10일 거래량</th>
+            </tr>
+            </thead>
+            <tbody id="dataTable">
+            <!-- 데이터 행이 여기 추가됩니다. -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 모바일 카드 뷰 -->
+    <div class="mobile-view">
+        <div class="card-container" id="cardContainer">
+            <!-- 카드가 여기 추가됩니다. -->
+        </div>
+    </div>
 </div>
 
 <script>
-    // 음수면 파란색, 양수면 빨간색, 0이면 기본색(검정) 반환하는 함수
+    // 음수면 파란색, 양수면 빨간색, 0이면 검정색 반환하는 함수
     function getColor(value) {
         if (value > 0) return 'red';
         else if (value < 0) return 'blue';
         else return 'black';
     }
 
-    // 샘플 데이터 (실제 환경에서는 REST API 호출로 데이터를 가져올 수 있습니다)
+    // 샘플 데이터 (실제 환경에서는 API 호출로 데이터를 가져올 수 있음)
     const sampleData = [
-        { symbol:'SPY', todayPrice: 213.22, percentageByYesterday: -1.08, percentageByDaysBefore10: -0.69, percentageByDaysBefore20: -3.26, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -5.28 },
-        { symbol:'QQQ', todayPrice: 213.22, percentageByYesterday: -1.7, percentageByDaysBefore10: -1.31, percentageByDaysBefore20: -4.71, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -7.29 },
-        { symbol:'TLT', todayPrice: 213.22, percentageByYesterday: 0.1, percentageByDaysBefore10: 0.27, percentageByDaysBefore20: 0.12,  percentageByDaysBefore60: 5.4,percentageByDaysBefore100: 0.84 },
-        { symbol:'AAPL', todayPrice: 213.22, percentageByYesterday: -0.61, percentageByDaysBefore10: -4.42, percentageByDaysBefore20: -8.5, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -9.75 },
-        { symbol:'MSFT', todayPrice: 213.22, percentageByYesterday: -1.33, percentageByDaysBefore10: -1.02, percentageByDaysBefore20: -2.68, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -8.65 },
-        { symbol:'GOOGL', todayPrice: 213.22, percentageByYesterday: -2.2, percentageByDaysBefore10: -3.76, percentageByDaysBefore20: -6.12, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -11.47 },
-        { symbol:'AMZN', todayPrice: 213.22, percentageByYesterday: -1.49, percentageByDaysBefore10: -2.55, percentageByDaysBefore20: -6.27, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -10.49 },
-        { symbol:'META', todayPrice: 213.22, percentageByYesterday: -3.73, percentageByDaysBefore10: -4.82, percentageByDaysBefore20: -9.16, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -6.29 },
-        { symbol:'NVDA', todayPrice: 213.22, percentageByYesterday: -3.43, percentageByDaysBefore10: 0.88, percentageByDaysBefore20: -4.66, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -13.96 },
-        { symbol:'TSLA', todayPrice: 213.22, percentageByYesterday: -5.34, percentageByDaysBefore10: -8.41, percentageByDaysBefore20: -19.08, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -35.13 },
-        { symbol:'PLTR', todayPrice: 213.22, percentageByYesterday: -3.96, percentageByDaysBefore10: 0.99, percentageByDaysBefore20: -4.44, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 10.86 },
-        { symbol:'UBER', todayPrice: 213.22, percentageByYesterday: -1.62, percentageByDaysBefore10: -1.71, percentageByDaysBefore20: -4.37, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 1.55 },
-        { symbol:'TEM', todayPrice: 213.22, percentageByYesterday: -8.28, percentageByDaysBefore10: -3.14, percentageByDaysBefore20: -17.5, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -11.98 },
-        { symbol:'RXRX', todayPrice: 213.22, percentageByYesterday: -6.58, percentageByDaysBefore10: 0.96, percentageByDaysBefore20: -13.36, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -10.6 },
-        { symbol:'PEP', todayPrice: 213.22, percentageByYesterday: -1.55, percentageByDaysBefore10: -1.78, percentageByDaysBefore20: -2.07, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -3.87 },
-        { symbol:'KO', todayPrice: 213.22, percentageByYesterday: -1.06, percentageByDaysBefore10: -1.26, percentageByDaysBefore20: -1.7, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 6.65 },
-        { symbol:'O', todayPrice: 213.22, percentageByYesterday: -0.04, percentageByDaysBefore10: -0.42, percentageByDaysBefore20: -0.05, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 1.71 },
-        { symbol:'JPM', todayPrice: 213.22, percentageByYesterday: 0.44, percentageByDaysBefore10: -0.27, percentageByDaysBefore20: -5.61, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -5.08 },
-        { symbol:'BAC', todayPrice: 213.22, percentageByYesterday: 0.51, percentageByDaysBefore10: 2.05, percentageByDaysBefore20: -2.58, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -7.33 },
-        { symbol:'MS', todayPrice: 213.22, percentageByYesterday: 0.13, percentageByDaysBefore10: 1.54, percentageByDaysBefore20: -4.51, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -8.18 },
-        { symbol:'BLK', todayPrice: 213.22, percentageByYesterday: 0.06, percentageByDaysBefore10: 2.46, percentageByDaysBefore20: 0.85,  percentageByDaysBefore60: 5.4,percentageByDaysBefore100: -4.64 },
-        { symbol:'BRK.B', todayPrice: 213.22, percentageByYesterday: 0.02, percentageByDaysBefore10: 3.67, percentageByDaysBefore20: 4.57,  percentageByDaysBefore60: 5.4,percentageByDaysBefore100: 11.14 },
-        { symbol:'AXP', todayPrice: 213.22, percentageByYesterday: -0.63, percentageByDaysBefore10: -1.22, percentageByDaysBefore20: -6.64, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -11.11 },
-        { symbol:'V', todayPrice: 213.22, percentageByYesterday: 0.07, percentageByDaysBefore10: -0.91, percentageByDaysBefore20: -3.21, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 3.8 },
-        { symbol:'MA', todayPrice: 213.22, percentageByYesterday: -0.34, percentageByDaysBefore10: -0.94, percentageByDaysBefore20: -3.57, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -0.63 }
+        { symbol:'SPY', todayPrice: 213.22, percentageByYesterday: -1.08, percentageByDaysBefore10: -0.69, percentageByDaysBefore20: -3.26, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -5.28, percentageVolumeBy10Days: 4 },
+        { symbol:'QQQ', todayPrice: 213.22, percentageByYesterday: -1.7, percentageByDaysBefore10: -1.31, percentageByDaysBefore20: -4.71, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -7.29, percentageVolumeBy10Days: 4 },
+        { symbol:'TLT', todayPrice: 213.22, percentageByYesterday: 0.1, percentageByDaysBefore10: 0.27, percentageByDaysBefore20: 0.12,  percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 0.84, percentageVolumeBy10Days: 4 },
+        { symbol:'AAPL', todayPrice: 213.22, percentageByYesterday: -0.61, percentageByDaysBefore10: -4.42, percentageByDaysBefore20: -8.5, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -9.75, percentageVolumeBy10Days: 4 },
+        { symbol:'MSFT', todayPrice: 213.22, percentageByYesterday: -1.33, percentageByDaysBefore10: -1.02, percentageByDaysBefore20: -2.68, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -8.65, percentageVolumeBy10Days: 4 },
+        { symbol:'GOOGL', todayPrice: 213.22, percentageByYesterday: -2.2, percentageByDaysBefore10: -3.76, percentageByDaysBefore20: -6.12, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -11.47, percentageVolumeBy10Days: 4 },
+        { symbol:'AMZN', todayPrice: 213.22, percentageByYesterday: -1.49, percentageByDaysBefore10: -2.55, percentageByDaysBefore20: -6.27, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -10.49, percentageVolumeBy10Days: 4 },
+        { symbol:'META', todayPrice: 213.22, percentageByYesterday: -3.73, percentageByDaysBefore10: -4.82, percentageByDaysBefore20: -9.16, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -6.29, percentageVolumeBy10Days: 4 },
+        { symbol:'NVDA', todayPrice: 213.22, percentageByYesterday: -3.43, percentageByDaysBefore10: 0.88, percentageByDaysBefore20: -4.66, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -13.96, percentageVolumeBy10Days: 4 },
+        { symbol:'TSLA', todayPrice: 213.22, percentageByYesterday: -5.34, percentageByDaysBefore10: -8.41, percentageByDaysBefore20: -19.08, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -35.13, percentageVolumeBy10Days: 4 },
+        { symbol:'PLTR', todayPrice: 213.22, percentageByYesterday: -3.96, percentageByDaysBefore10: 0.99, percentageByDaysBefore20: -4.44, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 10.86, percentageVolumeBy10Days: 4 },
+        { symbol:'UBER', todayPrice: 213.22, percentageByYesterday: -1.62, percentageByDaysBefore10: -1.71, percentageByDaysBefore20: -4.37, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 1.55, percentageVolumeBy10Days: 4 },
+        { symbol:'TEM', todayPrice: 213.22, percentageByYesterday: -8.28, percentageByDaysBefore10: -3.14, percentageByDaysBefore20: -17.5, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -11.98, percentageVolumeBy10Days: 4 },
+        { symbol:'RXRX', todayPrice: 213.22, percentageByYesterday: -6.58, percentageByDaysBefore10: 0.96, percentageByDaysBefore20: -13.36, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -10.6, percentageVolumeBy10Days: 4 },
+        { symbol:'PEP', todayPrice: 213.22, percentageByYesterday: -1.55, percentageByDaysBefore10: -1.78, percentageByDaysBefore20: -2.07, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -3.87, percentageVolumeBy10Days: 4 },
+        { symbol:'KO', todayPrice: 213.22, percentageByYesterday: -1.06, percentageByDaysBefore10: -1.26, percentageByDaysBefore20: -1.7, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 6.65, percentageVolumeBy10Days: 4 },
+        { symbol:'O', todayPrice: 213.22, percentageByYesterday: -0.04, percentageByDaysBefore10: -0.42, percentageByDaysBefore20: -0.05, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 1.71, percentageVolumeBy10Days: 4 },
+        { symbol:'JPM', todayPrice: 213.22, percentageByYesterday: 0.44, percentageByDaysBefore10: -0.27, percentageByDaysBefore20: -5.61, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -5.08, percentageVolumeBy10Days: 4 },
+        { symbol:'BAC', todayPrice: 213.22, percentageByYesterday: 0.51, percentageByDaysBefore10: 2.05, percentageByDaysBefore20: -2.58, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -7.33, percentageVolumeBy10Days: 4 },
+        { symbol:'MS', todayPrice: 213.22, percentageByYesterday: 0.13, percentageByDaysBefore10: 1.54, percentageByDaysBefore20: -4.51, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -8.18, percentageVolumeBy10Days: 4 },
+        { symbol:'BLK', todayPrice: 213.22, percentageByYesterday: 0.06, percentageByDaysBefore10: 2.46, percentageByDaysBefore20: 0.85, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -4.64, percentageVolumeBy10Days: 4 },
+        { symbol:'BRK.B', todayPrice: 213.22, percentageByYesterday: 0.02, percentageByDaysBefore10: 3.67, percentageByDaysBefore20: 4.57, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 11.14, percentageVolumeBy10Days: 4 },
+        { symbol:'AXP', todayPrice: 213.22, percentageByYesterday: -0.63, percentageByDaysBefore10: -1.22, percentageByDaysBefore20: -6.64, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -11.11, percentageVolumeBy10Days: 4 },
+        { symbol:'V', todayPrice: 213.22, percentageByYesterday: 0.07, percentageByDaysBefore10: -0.91, percentageByDaysBefore20: -3.21, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: 3.8, percentageVolumeBy10Days: 4 },
+        { symbol:'MA', todayPrice: 213.22, percentageByYesterday: -0.34, percentageByDaysBefore10: -0.94, percentageByDaysBefore20: -3.57, percentageByDaysBefore60: 5.4, percentageByDaysBefore100: -0.63, percentageVolumeBy10Days: 4 }
     ];
 
+    // 추세를 계산하는 함수 예시
+    function getTrend(dto) {
+        const recent10 = dto.percentageByDaysBefore10;
+        const recent20 = dto.percentageByDaysBefore20;
+
+        // 상승 조건
+        const isRising = recent10 > 0 || (recent10 - recent20) > 0.5;
+
+        // 하락 조건
+        const isFalling = recent10 < 0 || (recent10 - recent20) < -0.5;
+
+        // 보합 조건 (최근 10일 움직임이 ±0.5% 이내)
+        const isFlat = Math.abs(recent10) <= 0.5 && Math.abs(recent10 - recent20) <= 0.5;
+
+        let trend = '';
+
+        if (isFlat) {
+            trend = '⚫️ 보합';
+        } else if (isRising && !isFalling) {
+            trend = '🔴 상승';
+        } else if (isFalling && !isRising) {
+            trend = '🔵 하락';
+        } else {
+            // 상승/하락 혼재 시 보합 처리
+            trend = '⚫️ 보합';
+        }
+
+        // 거래량 증감 판단
+        if (dto.percentageVolumeBy10Days > 0) {
+            trend += ' (거래량 증가)';
+        } else if (dto.percentageVolumeBy10Days < 0) {
+            trend += ' (거래량 감소)';
+        }
+
+        return trend;
+    }
+
+    // 데스크탑 테이블 렌더링 함수 수정
     function renderTable(data) {
         const tableBody = document.getElementById('dataTable');
         tableBody.innerHTML = "";
         data.forEach(dto => {
+            const trend = getTrend(dto);
             const row = document.createElement('tr');
             row.innerHTML = `
           <td style="font-weight: bold; background-color: #f4f4f4">${dto.symbol}</td>
@@ -152,18 +193,47 @@
           <td style="color: ${getColor(dto.percentageByDaysBefore20)};">${dto.percentageByDaysBefore20}%</td>
           <td style="color: ${getColor(dto.percentageByDaysBefore60)};">${dto.percentageByDaysBefore60}%</td>
           <td style="color: ${getColor(dto.percentageByDaysBefore100)};">${dto.percentageByDaysBefore100}%</td>
+          <td style="color: ${getColor(dto.percentageVolumeBy10Days)};">${dto.percentageVolumeBy10Days}%</td>
+          <td>${trend}</td>
         `;
             tableBody.appendChild(row);
         });
     }
 
+    // 모바일 카드 렌더링 함수 수정
+    function renderCards(data) {
+        const cardContainer = document.getElementById('cardContainer');
+        cardContainer.innerHTML = "";
+        data.forEach(dto => {
+            const trend = getTrend(dto);
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+          <h2>${dto.symbol}</h2>
+          <p><strong>Today Price:</strong> ${dto.todayPrice}</p>
+          <p><strong>Yesterday:</strong> <span style="color: ${getColor(dto.percentageByYesterday)};">${dto.percentageByYesterday}%</span></p>
+          <p><strong>10일 전:</strong> <span style="color: ${getColor(dto.percentageByDaysBefore10)};">${dto.percentageByDaysBefore10}%</span></p>
+          <p><strong>20일 전:</strong> <span style="color: ${getColor(dto.percentageByDaysBefore20)};">${dto.percentageByDaysBefore20}%</span></p>
+          <p><strong>60일 전:</strong> <span style="color: ${getColor(dto.percentageByDaysBefore60)};">${dto.percentageByDaysBefore60}%</span></p>
+          <p><strong>100일 전:</strong> <span style="color: ${getColor(dto.percentageByDaysBefore100)};">${dto.percentageByDaysBefore100}%</span></p>
+          <p><strong>10일 거래량:</strong> <span style="color: ${getColor(dto.percentageVolumeBy10Days)};">${dto.percentageVolumeBy10Days}%</span></p>
+          <p><strong>추세:</strong> ${trend}</p>
+        `;
+            cardContainer.appendChild(card);
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // 실제 API로 데이터를 가져오려면 아래 주석을 해제하세요.
-        // fetch('/av')
-        //   .then(response => response.json())
-        //   .then(data => renderTable(data))
-        //   .catch(error => console.error('Error fetching data:', error));
-        renderTable(sampleData);
+        // 실제 환경에서는 API 호출 후 데이터를 렌더링 할 수 있습니다.
+        fetch('/av')
+            .then(response => response.json())
+            .then(data => {
+                renderTable(data);
+                renderCards(data);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        // renderTable(sampleData);
+        // renderCards(sampleData);
     });
 </script>
 </body>

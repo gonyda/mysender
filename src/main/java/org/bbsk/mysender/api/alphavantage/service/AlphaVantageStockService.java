@@ -77,6 +77,27 @@ public class AlphaVantageStockService {
     }
 
     /**
+     * 10일 평균거래량 대비 당일거래량
+     * @param stockData
+     * @return
+     */
+    public double getPercentageVolumeBy10DaysBefore(StockDataResponseDto stockData) {
+        // 10일 평균 거래량 계산
+        long averageVolumeBy10Days = stockData.getTimeSeriesDaily().keySet().stream()
+                .limit(10)
+                .mapToLong(date -> Long.parseLong(stockData.getTimeSeriesDaily().get(date).getVolume()))
+                .sum() / 10;
+
+        // 오늘 거래량 계산
+        long todayVolume = stockData.getTimeSeriesDaily().keySet().stream()
+                .findFirst()
+                .map(date -> Long.parseLong(stockData.getTimeSeriesDaily().get(date).getVolume()))
+                .orElseThrow(() -> new IllegalStateException("## getPercentageVolumeBy10DaysBefore"));
+
+        return getPercentage(todayVolume, averageVolumeBy10Days);
+    }
+
+    /**
      * 퍼센테이지 값 구하기
      * @param todayPrice
      * @param targetPrice

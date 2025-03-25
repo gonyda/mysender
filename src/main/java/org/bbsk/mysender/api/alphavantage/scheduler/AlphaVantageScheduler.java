@@ -43,6 +43,8 @@ public class AlphaVantageScheduler {
             double percentageByDaysBefore60 = alphaVantageStockService.getPercentageByDaysBefore(stockData, todayPrice, 60);
             // 100일 평균값 구하기
             double percentageByDaysBefore100 = alphaVantageStockService.getPercentageByDaysBefore(stockData, todayPrice, 100);
+            // 10일 평균거래량 대비 당일거래량
+            double percentageVolumeBy10Days = alphaVantageStockService.getPercentageVolumeBy10DaysBefore(stockData);
 
             StaticStockDto.STATIC_STOCK_DTO_LIST.add(
                     new StockDto(symbol,
@@ -51,7 +53,8 @@ public class AlphaVantageScheduler {
                             percentageByDaysBefore10,
                             percentageByDaysBefore20,
                             percentageByDaysBefore60,
-                            percentageByDaysBefore100)
+                            percentageByDaysBefore100,
+                            percentageVolumeBy10Days)
             );
         }
 
