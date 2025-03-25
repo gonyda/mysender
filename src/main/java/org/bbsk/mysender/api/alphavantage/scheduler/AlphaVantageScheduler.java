@@ -39,6 +39,8 @@ public class AlphaVantageScheduler {
             double percentageByDaysBefore10 = alphaVantageStockService.getPercentageByDaysBefore(stockData, todayPrice, 10 );
             // 20일 평균값 구하기
             double percentageByDaysBefore20 = alphaVantageStockService.getPercentageByDaysBefore(stockData, todayPrice, 20);
+            // 60일 평균값 구하기
+            double percentageByDaysBefore60 = alphaVantageStockService.getPercentageByDaysBefore(stockData, todayPrice, 60);
             // 100일 평균값 구하기
             double percentageByDaysBefore100 = alphaVantageStockService.getPercentageByDaysBefore(stockData, todayPrice, 100);
 
@@ -48,6 +50,7 @@ public class AlphaVantageScheduler {
                             percentageByYesterday,
                             percentageByDaysBefore10,
                             percentageByDaysBefore20,
+                            percentageByDaysBefore60,
                             percentageByDaysBefore100)
             );
         }
