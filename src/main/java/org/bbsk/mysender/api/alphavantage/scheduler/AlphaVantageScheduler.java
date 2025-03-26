@@ -22,7 +22,7 @@ public class AlphaVantageScheduler {
         this.alphaVantageStockService = alphaVantageStockService;
     }
 
-    @Scheduled(cron = "0 0 7 * * TUE-SAT")
+    @Scheduled(cron = "0 30 13 * * TUE-SAT")
     public void getStockData() {
         // 기존 데이터 초기화
         StaticStockDto.STATIC_STOCK_DTO_LIST.clear();
