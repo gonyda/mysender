@@ -14,6 +14,7 @@ import java.time.Duration;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,6 +54,7 @@ public class FmKoreaCrawlingByPopularService {
         // 전체 크롤링 작업 종료 후 브라우저, 컨텍스트 닫기
         PlayWrightUtils.close(browserContext, mainPage);
 
+        Collections.reverse(crawledArticles);
         return crawledArticles;
     }
 

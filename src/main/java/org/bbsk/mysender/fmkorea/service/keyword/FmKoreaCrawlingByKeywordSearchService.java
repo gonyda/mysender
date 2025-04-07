@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,6 +67,7 @@ public class FmKoreaCrawlingByKeywordSearchService {
         PlayWrightUtils.close(browserContext, page);
         log.info("## End Crawling");
 
+        Collections.reverse(dtoList);
         return dtoList;
     }
 
