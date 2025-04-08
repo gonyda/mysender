@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 public class FmKoreaCrawlingByPopularService {
@@ -114,7 +115,8 @@ public class FmKoreaCrawlingByPopularService {
                     ContentCrawlingDto crawlingDto = fmKoreaContentCrawlingByPopularService.getContentCrawling(mainPage);
                     log.info("## 인기글 Crawled {} posts", workCnt.incrementAndGet());
                     return crawlingDto.getFmKoreaArticleDto();
-                }).toList();
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
