@@ -5,6 +5,8 @@ import org.bbsk.mysender.crawler.PlayWrightUtils;
 import org.bbsk.mysender.fmkorea.constant.FmKoreaStockEnum;
 import org.bbsk.mysender.fmkorea.dto.ContentCrawlingDto;
 import org.bbsk.mysender.fmkorea.dto.FmKoreaArticleDto;
+import org.bbsk.mysender.gmail.constant.GmailEnum;
+import org.bbsk.mysender.gmail.service.GmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,9 +31,12 @@ public class FmKoreaCrawlingByPopularService {
     private static final Logger log = LoggerFactory.getLogger(FmKoreaCrawlingByPopularService.class);
 
     private final FmKoreaContentCrawlingByPopularService fmKoreaContentCrawlingByPopularService;
+    private final GmailService gmailService;
 
-    public FmKoreaCrawlingByPopularService(FmKoreaContentCrawlingByPopularService fmKoreaContentCrawlingByPopularService) {
+    public FmKoreaCrawlingByPopularService(FmKoreaContentCrawlingByPopularService fmKoreaContentCrawlingByPopularService
+            , GmailService gmailService) {
         this.fmKoreaContentCrawlingByPopularService = fmKoreaContentCrawlingByPopularService;
+        this.gmailService = gmailService;
     }
 
     /**
@@ -42,21 +47,29 @@ public class FmKoreaCrawlingByPopularService {
      * @return
      */
     public List<FmKoreaArticleDto> getFmKoreaCrawlingByPopularToStock(LocalTime now, long crawlingTime) {
-        // 메인 페이지 생성 및 인기 게시글 목록 크롤링
-        BrowserContext browserContext = PlayWrightUtils.getBrowser();
-        Page mainPage = browserContext.newPage();
+        try {
+            // 메인 페이지 생성 및 인기 게시글 목록 크롤링
+            BrowserContext browserContext = PlayWrightUtils.getBrowser();
+            Page mainPage = browserContext.newPage();
 
-        // 인기글 리스트 조회 - 링크, 작성시간
-        List<String> linkList = getArticleLinkList(now, crawlingTime, mainPage);
+            // 인기글 리스트 조회 - 링크, 작성시간
+            List<String> linkList = getArticleLinkList(now, crawlingTime, mainPage);
 
-        // 본문 크롤링
-        List<FmKoreaArticleDto> crawledArticles = getCrawlingArticles(linkList, mainPage);
+            // 본문 크롤링
+            List<FmKoreaArticleDto> crawledArticles = getCrawlingArticles(linkList, mainPage);
 
-        // 전체 크롤링 작업 종료 후 브라우저, 컨텍스트 닫기
-        PlayWrightUtils.close(browserContext, mainPage);
+            // 전체 크롤링 작업 종료 후 브라우저, 컨텍스트 닫기
+            PlayWrightUtils.close(browserContext, mainPage);
 
-        Collections.reverse(crawledArticles);
-        return crawledArticles;
+            Collections.reverse(crawledArticles);
+            return crawledArticles;
+        } catch (Exception e) {
+            gmailService.sendEmail(
+                    GmailEnum.TO.getValue(), "## ERROR 인기글 크롤링", e.getMessage()
+            );
+
+            return Collections.emptyList();
+        }
     }
 
     /**

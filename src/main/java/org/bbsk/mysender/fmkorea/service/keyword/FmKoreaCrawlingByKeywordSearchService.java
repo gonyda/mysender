@@ -39,6 +39,8 @@ public class FmKoreaCrawlingByKeywordSearchService {
      * @return
      */
     public List<FmKoreaArticleDto> getFmKoreaCrawlingBySearchKeywordToStock(String keyword, LocalDateTime now, int crawlingTime) {
+        // TODO 크롤링 에러 처리
+
         log.info("## Current Keyword: {}", keyword);
         AtomicInteger workCnt = new AtomicInteger();
 
