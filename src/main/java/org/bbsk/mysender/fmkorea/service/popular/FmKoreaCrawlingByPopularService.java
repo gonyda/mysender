@@ -47,10 +47,11 @@ public class FmKoreaCrawlingByPopularService {
      * @return
      */
     public List<FmKoreaArticleDto> getFmKoreaCrawlingByPopularToStock(LocalTime now, long crawlingTime) {
+        // TODO try문 안으로
+        // 메인 페이지 생성 및 인기 게시글 목록 크롤링
+        BrowserContext browserContext = PlayWrightUtils.getBrowser();
+        Page mainPage = browserContext.newPage();
         try {
-            // 메인 페이지 생성 및 인기 게시글 목록 크롤링
-            BrowserContext browserContext = PlayWrightUtils.getBrowser();
-            Page mainPage = browserContext.newPage();
 
             // 인기글 리스트 조회 - 링크, 작성시간
             List<String> linkList = getArticleLinkList(now, crawlingTime, mainPage);
@@ -68,6 +69,7 @@ public class FmKoreaCrawlingByPopularService {
                     GmailEnum.TO.getValue(), "## ERROR 인기글 크롤링", e.getMessage()
             );
 
+            log.error(mainPage.content());
             return Collections.emptyList();
         }
     }
